@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.30.0/dist/tabler-icons.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/docx@8.2.0/build/index.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     /* ==================== All existing styles remain the same ==================== */
     * {
@@ -1009,6 +1009,11 @@
       color: white;
     }
     .download-btn.docx:hover { filter: brightness(1.2); transform: scale(1.05); }
+    .download-btn.pdf {
+      background: var(--primary);
+      color: white;
+    }
+    .download-btn.pdf:hover { filter: brightness(1.2); transform: scale(1.05); }
     .download-btn.print {
       background: #2d2d2d;
       color: white;
@@ -1651,6 +1656,7 @@
     <div class="resume-section glass-card reveal-hidden" id="resumeContent">
       <div class="resume-actions">
         <button class="download-btn docx" onclick="downloadResumeDOCX()"><i class="ti ti-file-word"></i> Download DOCX</button>
+        <button class="download-btn pdf" onclick="downloadResumePDF()"><i class="ti ti-file-type-pdf"></i> Download PDF</button>
         <button class="download-btn print" onclick="window.print()"><i class="ti ti-printer"></i> Print</button>
       </div>
 
@@ -2301,12 +2307,37 @@ document.querySelectorAll('.nav-link').forEach(link => {
 // ========================================================================
 const RECRUITER_EMAIL = 'surajsingh.work.01@gmail.com';
 
-document.getElementById('sendContactMessage')?.addEventListener('click', () => {
+// To make messages land directly in your inbox (no visitor email app required):
+// 1. Go to https://formspree.io and sign up free with surajsingh.work.01@gmail.com
+// 2. Create a new form -> copy the endpoint, it looks like https://formspree.io/f/abcdwxyz
+// 3. Paste the ID below (replace YOUR_FORM_ID). Leave as-is to fall back to mailto.
+const FORMSPREE_FORM_ID = 'xykqdrln';
+const FORMSPREE_ENDPOINT = FORMSPREE_FORM_ID && FORMSPREE_FORM_ID !== 'YOUR_FORM_ID'
+  ? `https://formspree.io/f/${FORMSPREE_FORM_ID}`
+  : null;
+
+async function sendFormDirect(payload, subject) {
+  if (!FORMSPREE_ENDPOINT) return false;
+  try {
+    const res = await fetch(FORMSPREE_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ ...payload, _subject: subject })
+    });
+    return res.ok;
+  } catch (e) {
+    console.error('Formspree send failed:', e);
+    return false;
+  }
+}
+
+document.getElementById('sendContactMessage')?.addEventListener('click', async () => {
   const name = document.getElementById('contactName').value.trim();
   const email = document.getElementById('contactEmail').value.trim();
   const subject = document.getElementById('contactSubject').value.trim() || 'Hiring Inquiry';
   const message = document.getElementById('contactMessage').value.trim();
   const msgEl = document.getElementById('contactMsg');
+  const btn = document.getElementById('sendContactMessage');
 
   if (!name || !email || !message) {
     msgEl.innerHTML = '⚠️ Please fill in your name, email, and message.';
@@ -2317,18 +2348,28 @@ document.getElementById('sendContactMessage')?.addEventListener('click', () => {
     return;
   }
 
-  const body = `From: ${name}\nEmail: ${email}\n\nMessage:\n${message}`;
-  const mailtoLink = `mailto:${RECRUITER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  window.location.href = mailtoLink;
+  btn.disabled = true;
+  msgEl.innerHTML = 'Sending...';
 
-  msgEl.innerHTML = `✅ Opening your email app to send to ${RECRUITER_EMAIL}.`;
-  document.getElementById('contactName').value = '';
-  document.getElementById('contactEmail').value = '';
-  document.getElementById('contactSubject').value = '';
-  document.getElementById('contactMessage').value = '';
+  const sent = await sendFormDirect({ name, email, subject, message }, subject);
+
+  btn.disabled = false;
+
+  if (sent) {
+    msgEl.innerHTML = `✅ Message sent directly to ${RECRUITER_EMAIL}. Thank you!`;
+    document.getElementById('contactName').value = '';
+    document.getElementById('contactEmail').value = '';
+    document.getElementById('contactSubject').value = '';
+    document.getElementById('contactMessage').value = '';
+  } else {
+    const body = `From: ${name}\nEmail: ${email}\n\nMessage:\n${message}`;
+    const mailtoLink = `mailto:${RECRUITER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
+    msgEl.innerHTML = `Opening your email app to send to ${RECRUITER_EMAIL}.`;
+  }
 });
 
-document.getElementById('submitJob')?.addEventListener('click', () => {
+document.getElementById('submitJob')?.addEventListener('click', async () => {
   const company = document.getElementById('jobCompany').value.trim();
   const title = document.getElementById('jobTitle').value.trim();
   const type = document.getElementById('jobType').value;
@@ -2341,6 +2382,7 @@ document.getElementById('submitJob')?.addEventListener('click', () => {
   const contactEmail = document.getElementById('jobContactEmail').value.trim();
   const contactPhone = document.getElementById('jobContactPhone').value.trim();
   const jobMsgEl = document.getElementById('jobMsg');
+  const jobBtn = document.getElementById('submitJob');
 
   if (!company || !title || !description || !contactName || !contactEmail) {
     jobMsgEl.innerHTML = '⚠️ Please fill in Company, Job Title, Description, Your Name, and Your Email.';
@@ -2354,10 +2396,23 @@ document.getElementById('submitJob')?.addEventListener('click', () => {
   const subject = `New Job Requirement: ${title} @ ${company}`;
   const body = `A new job requirement was submitted via HireWithSuraj AI.\n\nCOMPANY: ${company}\nJOB TITLE: ${title}\nEMPLOYMENT TYPE: ${type}\nLOCATION: ${location || 'Not specified'}\nEXPERIENCE LEVEL: ${experience || 'Not specified'}\nBUDGET / RATE: ${budget || 'Not specified'}\nKEY SKILLS: ${skills || 'Not specified'}\n\nJOB DESCRIPTION:\n${description}\n\nSUBMITTED BY:\nName: ${contactName}\nEmail: ${contactEmail}\nPhone: ${contactPhone || 'Not provided'}`;
 
-  const mailtoLink = `mailto:${RECRUITER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  window.location.href = mailtoLink;
+  jobBtn.disabled = true;
+  jobMsgEl.innerHTML = 'Sending...';
 
-  jobMsgEl.innerHTML = `✅ Opening your email app to send this requirement to ${RECRUITER_EMAIL}.`;
+  const sent = await sendFormDirect({
+    company, title, type, location, experience, budget, skills, description,
+    name: contactName, email: contactEmail, phone: contactPhone
+  }, subject);
+
+  jobBtn.disabled = false;
+
+  if (sent) {
+    jobMsgEl.innerHTML = `✅ Job requirement sent directly to ${RECRUITER_EMAIL}. Thank you!`;
+  } else {
+    const mailtoLink = `mailto:${RECRUITER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
+    jobMsgEl.innerHTML = `Opening your email app to send this requirement to ${RECRUITER_EMAIL}.`;
+  }
 });
 
 // AI Chat
@@ -2482,524 +2537,207 @@ window.onclick = (e) => {
 renderBlogs();
 
 // ========================================================================
-// 10. RESUME DOWNLOAD - PROPER DOCX USING docx.js library
+// 10. RESUME DOWNLOAD - shared helpers
 // ========================================================================
-async function downloadResumeDOCX() {
-  try {
-    const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, convertInchesToTwip } = docx;
-    
-    const doc = new Document({
-      sections: [{
-        properties: {
-          page: {
-            margin: {
-              top: convertInchesToTwip(1),
-              bottom: convertInchesToTwip(1),
-              left: convertInchesToTwip(1),
-              right: convertInchesToTwip(1)
-            }
-          }
-        },
-        children: [
-          // Name
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Suraj Singh",
-                size: 28,
-                bold: true,
-                font: "Arial"
-              })
-            ],
-            alignment: AlignmentType.CENTER
-          }),
-          
-          // Title
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Engineering Hiring Leader | MCP, Agentic AI & GenAI Recruiter | AI-Driven Talent Acquisition",
-                size: 20,
-                font: "Arial"
-              })
-            ],
-            alignment: AlignmentType.CENTER
-          }),
-          
-          // Contact info with updated email
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Indore, Madhya Pradesh, India | Email: surajsingh.work.01@gmail.com | LinkedIn: linkedin.com/in/surajsingh-ai",
-                size: 18,
-                font: "Arial"
-              })
-            ],
-            alignment: AlignmentType.CENTER
-          }),
-          
-          // Spacer
-          new Paragraph({ children: [] }),
-          
-          // PROFESSIONAL SUMMARY
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "PROFESSIONAL SUMMARY",
-                size: 22,
-                bold: true,
-                font: "Arial"
-              })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Engineering Hiring Leader with 7+ years of experience in global technical recruitment, specializing in AI, Generative AI, MCP, Agentic AI, AI/ML, Cloud, Data Engineering, Product, and Enterprise Technology hiring across North America, APAC, and LATAM. Partnered with enterprise and FAANG-adjacent organizations including Sephora, Walmart, JPMorgan Chase, HPE, Albertsons, Meta, Equinix, Samsung, Airbnb, Sony, and GoPro to build high-performing engineering and product teams.",
-                size: 20,
-                font: "Arial"
-              })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Strong expertise in AI-driven recruiting, technical sourcing, stakeholder partnership, talent intelligence, candidate engagement, and hiring strategy. Hands-on experience using ChatGPT, Claude, prompt engineering, and custom GPT workflows to improve recruiting efficiency.",
-                size: 20,
-                font: "Arial"
-              })
-            ]
-          }),
-          
-          // Spacer
-          new Paragraph({ children: [] }),
-          
-          // AI & EMERGING TECHNOLOGY EXPERTISE
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "AI & EMERGING TECHNOLOGY EXPERTISE",
-                size: 22,
-                bold: true,
-                font: "Arial"
-              })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• MCP (Model Context Protocol) & Agentic AI Talent Hiring", size: 20, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Generative AI (GenAI), LLM Engineering & AI Product Hiring", size: 20, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• AI Engineers, AI Architects, Data Engineers & AI/ML Specialists", size: 20, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Prompt Engineering & AI-powered recruitment workflows", size: 20, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• ChatGPT, Claude, Gemini, Custom GPT workflows", size: 20, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• RAG, LLM, AI Platform and Enterprise AI ecosystem hiring", size: 20, font: "Arial" })
-            ]
-          }),
-          
-          // Spacer
-          new Paragraph({ children: [] }),
-          
-          // CORE COMPETENCIES
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "CORE COMPETENCIES",
-                size: 22,
-                bold: true,
-                font: "Arial"
-              })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Full Life Cycle Recruiting (Contract, C2H, FTE)", size: 20, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Engineering, Product, Data, Cloud & AI Hiring", size: 20, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Hiring Manager & Client Relationship Management", size: 20, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Strategic Sourcing & Market Mapping", size: 20, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• LinkedIn Recruiter, Dice, GitHub, Stack Overflow", size: 20, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• ATS/VMS: JobDiva, Ceipal, Workday, Fieldglass", size: 20, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Interview Management, Offer Negotiation & Delivery Leadership", size: 20, font: "Arial" })
-            ]
-          }),
-          
-          // Spacer
-          new Paragraph({ children: [] }),
-          
-          // PROFESSIONAL EXPERIENCE
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "PROFESSIONAL EXPERIENCE",
-                size: 22,
-                bold: true,
-                font: "Arial"
-              })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "BayOne Solutions | Lead Talent Partner (AI & Engineering Hiring) | June 2022 - Present",
-                size: 20,
-                bold: true,
-                font: "Arial"
-              })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Lead end-to-end recruitment for AI, GenAI, MCP, Agentic AI, Data, Cloud, Backend, Frontend, Full Stack, DevOps, and Enterprise Architecture roles.", size: 19, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Partner with Engineering Managers, Product Leaders, Architects, and business stakeholders to scale technology organizations.", size: 19, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Specialized hiring for MCP Architects, Agentic AI Engineers, AI Product Managers, GenAI Specialists, Lead Data Engineers, and AI-focused Data Architects.", size: 19, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Leverage AI-driven recruiting strategies using Claude, ChatGPT, prompt engineering, and custom GPT workflows.", size: 19, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Support enterprise clients including Sephora, Walmart, JPMorgan Chase, HPE, Albertsons, Woven, Shipt, McGrath RentCorp, and Hims & Hers Health.", size: 19, font: "Arial" })
-            ]
-          }),
-          
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "AMISEQ | Senior Technical Recruiter | July 2021 - June 2022",
-                size: 20,
-                bold: true,
-                font: "Arial"
-              })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Managed complete recruitment lifecycle including sourcing, screening, interview coordination, offer management, and onboarding.", size: 19, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Supported major client engagements including Walmart, Meta, and Equinix.", size: 19, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Built pipelines across Backend, Frontend, Full Stack, Cloud, DevOps, Data Engineering, Infrastructure, and Product roles.", size: 19, font: "Arial" })
-            ]
-          }),
-          
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Global Information Technology | Talent Acquisition Lead | August 2020 - July 2021",
-                size: 20,
-                bold: true,
-                font: "Arial"
-              })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Led recruitment strategy for Analytics, Cloud, Data Platforms, and emerging technology roles.", size: 19, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Managed recruiting teams and improved sourcing efficiency through market intelligence and process optimization.", size: 19, font: "Arial" })
-            ]
-          }),
-          
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Vertisystem | Senior IT Recruiter | 2018 - 2019",
-                size: 20,
-                bold: true,
-                font: "Arial"
-              })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Managed full-cycle IT recruitment across software development lifecycle and infrastructure domains.", size: 19, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Handled sourcing, candidate engagement, negotiations, and client delivery.", size: 19, font: "Arial" })
-            ]
-          }),
-          
-          // Spacer
-          new Paragraph({ children: [] }),
-          
-          // RECOGNITION & AWARDS
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "RECOGNITION & AWARDS",
-                size: 22,
-                bold: true,
-                font: "Arial"
-              })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• The Growth Accelerator Award --- Quarter 1 2026", size: 20, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• The Money Magnet Award --- Quarter 1 2026", size: 20, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• The Growth Accelerator Award --- February 2026", size: 20, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• The Sourcing Sentinel Award --- August 2025", size: 20, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• The Money Magnet Award --- September 2025", size: 20, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Growth Accelerator Award --- September 2025", size: 20, font: "Arial" })
-            ]
-          }),
-          
-          // Spacer
-          new Paragraph({ children: [] }),
-          
-          // CERTIFICATIONS
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "CERTIFICATIONS",
-                size: 22,
-                bold: true,
-                font: "Arial"
-              })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• AI-Driven Recruiting - LinkedIn Recruiter Power User Assessment (Issued July 2025)", size: 20, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• Employer Branding Certification - hirist", size: 20, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "• MERN Stack & Advanced JavaScript Certifications", size: 20, font: "Arial" })
-            ]
-          }),
-          
-          // Spacer
-          new Paragraph({ children: [] }),
-          
-          // TECHNICAL BACKGROUND
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "TECHNICAL BACKGROUND",
-                size: 22,
-                bold: true,
-                font: "Arial"
-              })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "MERN Stack Development: MongoDB, Express.js, React.js, Node.js, JavaScript, HTML, CSS, GitHub", size: 20, font: "Arial" })
-            ]
-          }),
-          
-          // Spacer
-          new Paragraph({ children: [] }),
-          
-          // EDUCATION
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "EDUCATION",
-                size: 22,
-                bold: true,
-                font: "Arial"
-              })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Bachelor of Engineering (B.E.) - Information Technology", size: 20, font: "Arial" })
-            ]
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({ text: "Rustamji Institute of Technology", size: 20, font: "Arial" })
-            ]
-          })
-        ]
-      }]
+
+// Universal download trigger - does not depend on any external library.
+function triggerBlobDownload(blob, filename) {
+  if (typeof saveAs === 'function') {
+    saveAs(blob, filename);
+    return;
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// Walks the live #resumeContent DOM and returns a structured list of
+// blocks so both the DOCX and PDF exports always match what's on the page.
+function getResumeBlocks() {
+  const root = document.getElementById('resumeContent');
+  if (!root) return null;
+
+  const name = root.querySelector('h1')?.textContent.trim() || 'Suraj Singh';
+  const subtitle = root.querySelector('.subtitle')?.textContent.trim() || '';
+  const contactSpans = Array.from(root.querySelectorAll('.contact-info span'))
+    .map(s => s.textContent.trim())
+    .filter(Boolean);
+
+  const sections = [];
+  root.querySelectorAll('.resume-item').forEach(item => {
+    const heading = item.querySelector('h3')?.textContent.trim() || '';
+    const lines = [];
+
+    item.querySelectorAll('.company').forEach(companyEl => {
+      const span = companyEl.querySelector('span');
+      const dates = span ? span.textContent.trim() : '';
+      const companyText = companyEl.cloneNode(true);
+      if (span) companyText.removeChild(companyText.querySelector('span'));
+      lines.push({ type: 'company', text: companyText.textContent.trim(), dates });
     });
 
-    const blob = await Packer.toBlob(doc);
-    saveAs(blob, 'Suraj_Singh_Detailed_AI_Resume_With_Awards.docx');
-    
-  } catch (error) {
-    console.error('Download error:', error);
-    // Fallback: Try plain text download
-    try {
-      const resumeText = `Suraj Singh
+    item.querySelectorAll('p').forEach(p => {
+      lines.push({ type: 'p', text: p.textContent.trim() });
+    });
 
-Engineering Hiring Leader | MCP, Agentic AI & GenAI Recruiter | AI-Driven Talent Acquisition
+    item.querySelectorAll('ul').forEach(ul => {
+      ul.querySelectorAll('li').forEach(li => {
+        lines.push({ type: 'li', text: li.textContent.trim() });
+      });
+    });
 
-Indore, Madhya Pradesh, India | Email: surajsingh.work.01@gmail.com | LinkedIn: linkedin.com/in/surajsingh-ai
+    sections.push({ heading, lines });
+  });
 
-PROFESSIONAL SUMMARY
+  return { name, subtitle, contact: contactSpans, sections };
+}
 
-Engineering Hiring Leader with 7+ years of experience in global technical recruitment, specializing in AI, Generative AI, MCP, Agentic AI, AI/ML, Cloud, Data Engineering, Product, and Enterprise Technology hiring across North America, APAC, and LATAM. Partnered with enterprise and FAANG-adjacent organizations including Sephora, Walmart, JPMorgan Chase, HPE, Albertsons, Meta, Equinix, Samsung, Airbnb, Sony, and GoPro to build high-performing engineering and product teams.
-
-Strong expertise in AI-driven recruiting, technical sourcing, stakeholder partnership, talent intelligence, candidate engagement, and hiring strategy. Hands-on experience using ChatGPT, Claude, prompt engineering, and custom GPT workflows to improve recruiting efficiency.
-
-AI & EMERGING TECHNOLOGY EXPERTISE
-
-- MCP (Model Context Protocol) & Agentic AI Talent Hiring
-- Generative AI (GenAI), LLM Engineering & AI Product Hiring
-- AI Engineers, AI Architects, Data Engineers & AI/ML Specialists
-- Prompt Engineering & AI-powered recruitment workflows
-- ChatGPT, Claude, Gemini, Custom GPT workflows
-- RAG, LLM, AI Platform and Enterprise AI ecosystem hiring
-
-CORE COMPETENCIES
-
-- Full Life Cycle Recruiting (Contract, C2H, FTE)
-- Engineering, Product, Data, Cloud & AI Hiring
-- Hiring Manager & Client Relationship Management
-- Strategic Sourcing & Market Mapping
-- LinkedIn Recruiter, Dice, GitHub, Stack Overflow
-- ATS/VMS: JobDiva, Ceipal, Workday, Fieldglass
-- Interview Management, Offer Negotiation & Delivery Leadership
-
-PROFESSIONAL EXPERIENCE
-
-BayOne Solutions | Lead Talent Partner (AI & Engineering Hiring) | June 2022 - Present
-
-- Lead end-to-end recruitment for AI, GenAI, MCP, Agentic AI, Data, Cloud, Backend, Frontend, Full Stack, DevOps, and Enterprise Architecture roles.
-- Partner with Engineering Managers, Product Leaders, Architects, and business stakeholders to scale technology organizations.
-- Specialized hiring for MCP Architects, Agentic AI Engineers, AI Product Managers, GenAI Specialists, Lead Data Engineers, and AI-focused Data Architects.
-- Leverage AI-driven recruiting strategies using Claude, ChatGPT, prompt engineering, and custom GPT workflows.
-- Support enterprise clients including Sephora, Walmart, JPMorgan Chase, HPE, Albertsons, Woven, Shipt, McGrath RentCorp, and Hims & Hers Health.
-
-AMISEQ | Senior Technical Recruiter | July 2021 - June 2022
-
-- Managed complete recruitment lifecycle including sourcing, screening, interview coordination, offer management, and onboarding.
-- Supported major client engagements including Walmart, Meta, and Equinix.
-- Built pipelines across Backend, Frontend, Full Stack, Cloud, DevOps, Data Engineering, Infrastructure, and Product roles.
-
-Global Information Technology | Talent Acquisition Lead | August 2020 - July 2021
-
-- Led recruitment strategy for Analytics, Cloud, Data Platforms, and emerging technology roles.
-- Managed recruiting teams and improved sourcing efficiency through market intelligence and process optimization.
-
-Vertisystem | Senior IT Recruiter | 2018 - 2019
-
-- Managed full-cycle IT recruitment across software development lifecycle and infrastructure domains.
-- Handled sourcing, candidate engagement, negotiations, and client delivery.
-
-RECOGNITION & AWARDS
-
-- The Growth Accelerator Award --- Quarter 1 2026
-- The Money Magnet Award --- Quarter 1 2026
-- The Growth Accelerator Award --- February 2026
-- The Sourcing Sentinel Award --- August 2025
-- The Money Magnet Award --- September 2025
-- Growth Accelerator Award --- September 2025
-
-CERTIFICATIONS
-
-- AI-Driven Recruiting - LinkedIn Recruiter Power User Assessment (Issued July 2025)
-- Employer Branding Certification - hirist
-- MERN Stack & Advanced JavaScript Certifications
-
-TECHNICAL BACKGROUND
-
-MERN Stack Development: MongoDB, Express.js, React.js, Node.js, JavaScript, HTML, CSS, GitHub
-
-EDUCATION
-
-Bachelor of Engineering (B.E.) - Information Technology
-Rustamji Institute of Technology`;
-
-      const blob = new Blob([resumeText], { type: 'application/msword;charset=utf-8' });
-      saveAs(blob, 'Suraj_Singh_Detailed_AI_Resume_With_Awards.docx');
-    } catch (fallbackError) {
-      alert('Error downloading resume. Please use the Print option instead.');
+// ========================================================================
+// 10a. RESUME DOWNLOAD - DOCX
+// Built as Word-compatible HTML (the classic, universally supported
+// technique). No external Word-generation library or CDN required, so
+// this can't break due to a script failing to load.
+// ========================================================================
+function downloadResumeDOCX() {
+  try {
+    const data = getResumeBlocks();
+    if (!data) {
+      alert('Resume content not found on the page. Please refresh and try again.');
+      return;
     }
+
+    let body = `<h1>${data.name}</h1>`;
+    if (data.subtitle) body += `<p class="subtitle">${data.subtitle}</p>`;
+    if (data.contact.length) body += `<p class="contact">${data.contact.join(' &nbsp;|&nbsp; ')}</p>`;
+
+    data.sections.forEach(sec => {
+      if (sec.heading) body += `<h3>${sec.heading}</h3>`;
+      let listOpen = false;
+      sec.lines.forEach(line => {
+        if (line.type === 'li') {
+          if (!listOpen) { body += '<ul>'; listOpen = true; }
+          body += `<li>${line.text}</li>`;
+        } else {
+          if (listOpen) { body += '</ul>'; listOpen = false; }
+          if (line.type === 'company') {
+            body += `<p class="company"><b>${line.text}</b>${line.dates ? ' &mdash; ' + line.dates : ''}</p>`;
+          } else {
+            body += `<p>${line.text}</p>`;
+          }
+        }
+      });
+      if (listOpen) body += '</ul>';
+    });
+
+    const styleBlock = `
+      body { font-family: Arial, sans-serif; color:#000; }
+      h1 { color:#e50914; font-size:22pt; margin-bottom:2px; }
+      h3 { color:#e50914; font-size:13pt; border-bottom:1px solid #e50914; margin-top:16px; margin-bottom:6px; padding-bottom:3px; }
+      p { font-size:11pt; line-height:1.4; color:#222; margin:4px 0; }
+      p.subtitle { font-size:12pt; color:#444; margin-top:0; }
+      p.contact { font-size:10pt; color:#555; margin-bottom:10px; }
+      p.company { font-weight:bold; color:#000; margin-bottom:2px; }
+      li { font-size:11pt; line-height:1.4; color:#222; margin-bottom:2px; }
+    `;
+
+    const html = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>${data.name} Resume</title><style>${styleBlock}</style></head>
+<body>${body}</body></html>`;
+
+    const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+    triggerBlobDownload(blob, 'Suraj_Singh_Resume.doc');
+  } catch (error) {
+    console.error('DOCX download error:', error);
+    alert('Sorry, the Word resume could not be downloaded. Please try the "Download PDF" button or the Print option instead.');
+  }
+}
+
+// ========================================================================
+// 10b. RESUME DOWNLOAD - PDF
+// Built directly with jsPDF text APIs (no html2canvas/DOM screenshotting),
+// so it can't render blank due to CSS variables, web fonts, or theming.
+// ========================================================================
+function downloadResumePDF() {
+  const jsPDFLib = window.jspdf && window.jspdf.jsPDF;
+  if (typeof jsPDFLib === 'undefined') {
+    alert('The PDF library failed to load (check your internet connection). Please refresh the page and try again, or use the Print button and choose "Save as PDF".');
+    return;
+  }
+
+  const data = getResumeBlocks();
+  if (!data) {
+    alert('Resume content not found on the page. Please refresh and try again.');
+    return;
+  }
+
+  const btn = document.querySelector('.download-btn.pdf');
+  const originalLabel = btn ? btn.innerHTML : null;
+  if (btn) { btn.innerHTML = '<i class="ti ti-loader-2"></i> Generating...'; btn.disabled = true; }
+
+  try {
+    const doc = new jsPDFLib({ unit: 'pt', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 40;
+    const maxWidth = pageWidth - margin * 2;
+    let y = margin;
+
+    function ensureSpace(h) {
+      if (y + h > pageHeight - margin) {
+        doc.addPage();
+        y = margin;
+      }
+    }
+
+    function writeText(text, { size = 11, color = [34, 34, 34], bold = false, gap = 4, indent = 0 } = {}) {
+      doc.setFont('helvetica', bold ? 'bold' : 'normal');
+      doc.setFontSize(size);
+      doc.setTextColor(...color);
+      const lines = doc.splitTextToSize(text, maxWidth - indent);
+      const lineHeight = size * 1.3;
+      ensureSpace(lines.length * lineHeight + gap);
+      doc.text(lines, margin + indent, y);
+      y += lines.length * lineHeight + gap;
+    }
+
+    // Name
+    writeText(data.name, { size: 22, bold: true, color: [229, 9, 20], gap: 4 });
+    // Subtitle
+    if (data.subtitle) writeText(data.subtitle, { size: 12, color: [80, 80, 80], gap: 4 });
+    // Contact
+    if (data.contact.length) writeText(data.contact.join('   |   '), { size: 10, color: [100, 100, 100], gap: 14 });
+
+    data.sections.forEach(sec => {
+      if (sec.heading) {
+        ensureSpace(26);
+        writeText(sec.heading, { size: 13, bold: true, color: [229, 9, 20], gap: 8 });
+        doc.setDrawColor(229, 9, 20);
+        doc.line(margin, y - 6, pageWidth - margin, y - 6);
+      }
+      sec.lines.forEach(line => {
+        if (line.type === 'company') {
+          const text = line.dates ? `${line.text}    ${line.dates}` : line.text;
+          writeText(text, { size: 11, bold: true, color: [0, 0, 0], gap: 4 });
+        } else if (line.type === 'li') {
+          writeText(`-  ${line.text}`, { size: 10.5, color: [50, 50, 50], gap: 3, indent: 8 });
+        } else {
+          writeText(line.text, { size: 10.5, color: [50, 50, 50], gap: 6 });
+        }
+      });
+      y += 6;
+    });
+
+    doc.save('Suraj_Singh_Resume.pdf');
+  } catch (error) {
+    console.error('PDF download error:', error);
+    alert('Sorry, the PDF could not be generated. Please use the Print button and choose "Save as PDF" instead.');
+  } finally {
+    if (btn) { btn.innerHTML = originalLabel; btn.disabled = false; }
   }
 }
 
