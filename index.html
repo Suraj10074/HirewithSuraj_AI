@@ -7,7 +7,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.30.0/dist/tabler-icons.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.2.0/build/index.min.js"></script>
   <style>
+    /* ==================== All existing styles remain the same ==================== */
     * {
       margin: 0;
       padding: 0;
@@ -293,7 +295,6 @@
     .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
     .nav-links a:hover { color: var(--primary); text-shadow: 0 0 6px var(--primary-glow); }
 
-    /* Theme button in navbar */
     .nav-theme-btn {
       background: none;
       border: 2px solid var(--border-color);
@@ -341,6 +342,14 @@
     .nav-theme-btn:hover .tooltip {
       display: block;
     }
+    .nav-theme-btn.admin-mode {
+      border-color: #10b981;
+      animation: adminPulse 2s infinite;
+    }
+    @keyframes adminPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    }
 
     .mobile-toggle {
       display: block;
@@ -355,7 +364,6 @@
       .mobile-toggle { display: none; }
     }
 
-    /* Mobile Menu */
     .nav-links-mobile {
       display: none;
       width: 100%;
@@ -496,7 +504,7 @@
       transform: translateY(0);
     }
 
-    /* ==================== HERO SECTION - FULLY CENTERED & RESPONSIVE ==================== */
+    /* ==================== HERO SECTION ==================== */
     #home {
       display: flex;
       align-items: center;
@@ -516,7 +524,6 @@
       margin: 0 auto;
     }
 
-    /* Badge */
     .hero-badge {
       display: inline-block;
       background: var(--bg-card);
@@ -542,7 +549,6 @@
       transition: color 0.5s ease;
     }
 
-    /* Profile Picture - Centered */
     .profile-wrapper {
       display: flex;
       justify-content: center;
@@ -591,7 +597,6 @@
       display: block;
     }
 
-    /* Rotating glow ring */
     .profile-pic-container::after {
       content: '';
       position: absolute;
@@ -616,7 +621,6 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Status badge */
     .profile-status {
       position: absolute;
       bottom: 4px;
@@ -643,7 +647,6 @@
       100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
 
-    /* Admin Only - Profile upload overlay */
     .profile-upload-overlay {
       position: absolute;
       bottom: 0;
@@ -686,7 +689,6 @@
       opacity: 0;
       cursor: pointer;
     }
-    /* Hidden by default - only shown when admin */
     .profile-upload-overlay {
       display: none;
     }
@@ -694,7 +696,6 @@
       display: flex;
     }
 
-    /* Badge Premium */
     .badge-premium {
       background: linear-gradient(95deg, var(--primary), var(--primary-dark));
       padding: 0.3rem 1rem;
@@ -716,7 +717,6 @@
       100% { opacity: 0.9; }
     }
 
-    /* Hero Title */
     .hero-title {
       font-size: 2.2rem;
       font-weight: 900;
@@ -750,7 +750,6 @@
       color: transparent;
     }
 
-    /* Hero Subtitle */
     .hero-sub {
       font-size: 0.85rem;
       margin: 0.6rem 0;
@@ -761,7 +760,6 @@
       .hero-sub { font-size: 1.5rem; margin: 1rem 0; }
     }
 
-    /* Hero Buttons */
     .hero-buttons {
       display: flex;
       gap: 0.6rem;
@@ -1270,6 +1268,23 @@
     .theme-drawer.open {
       bottom: 0;
     }
+    .theme-drawer .admin-only-message {
+      display: none;
+      text-align: center;
+      padding: 1rem;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+    .theme-drawer.admin-mode .admin-only-message {
+      display: none;
+    }
+    .theme-drawer:not(.admin-mode) .theme-drawer-grid,
+    .theme-drawer:not(.admin-mode) .custom-color-section {
+      display: none;
+    }
+    .theme-drawer:not(.admin-mode) .admin-only-message {
+      display: block;
+    }
 
     .theme-drawer-header {
       display: flex;
@@ -1283,6 +1298,18 @@
       font-size: 0.9rem;
       font-weight: 700;
       color: var(--text-primary);
+    }
+    .theme-drawer-title .admin-badge {
+      font-size: 0.5rem;
+      background: #10b981;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: 6px;
+      display: none;
+    }
+    .theme-drawer.admin-mode .theme-drawer-title .admin-badge {
+      display: inline-block;
     }
     .theme-drawer-close {
       background: none;
@@ -1506,7 +1533,7 @@
       <li><a href="#resume" class="nav-link">Resume</a></li>
       <li><a href="#recommendations" class="nav-link">Testimonials</a></li>
       <li><a href="#postjob" class="nav-link">Post a Job</a></li>
-      <li><a href="#contact" class="nav-link">Hire</a></li>
+      <li><a href="#contact" class="nav-link">Contact</a></li>
       <li>
         <button class="nav-theme-btn" id="navThemeBtn" title="Change Theme">
           <span class="color-dot" id="navColorDot"></span>
@@ -1523,7 +1550,7 @@
       <a href="#resume" class="nav-link">Resume</a>
       <a href="#recommendations" class="nav-link">Testimonials</a>
       <a href="#postjob" class="nav-link">Post a Job</a>
-      <a href="#contact" class="nav-link">Hire</a>
+      <a href="#contact" class="nav-link">Contact</a>
       <button class="nav-theme-btn-mobile" id="navThemeBtnMobile" title="Change Theme">
         <span class="color-dot" id="navColorDotMobile"></span>
       </button>
@@ -1534,15 +1561,10 @@
 <!-- ==================== MAIN CONTENT ==================== -->
 <div class="container">
 
-  <!-- HOME - Fully Centered -->
+  <!-- HOME -->
   <section id="home">
     <div class="hero-content reveal-hidden">
-      <!-- Badge -->
-      <div class="hero-badge">
-        ✦ <span>SURAJ SINGH</span> ✦
-      </div>
-      
-      <!-- Profile Picture - Centered -->
+      <div class="hero-badge">✦ <span>SURAJ SINGH</span> ✦</div>
       <div class="profile-wrapper">
         <div class="profile-pic-container" id="profileContainer">
           <img src="https://i.ibb.co/zWGF8m5s/Professional-Picture-1.png" alt="Suraj Singh" id="profileImage">
@@ -1553,20 +1575,9 @@
           </div>
         </div>
       </div>
-      
-      <!-- Premium Badge -->
       <div class="badge-premium">⚡ HIREWITH SURAJ AI ⚡</div>
-      
-      <!-- Hero Title -->
-      <h1 class="hero-title">
-        HireWithSuraj <span class="ai-glow">AI</span>
-        <span>by Suraj Singh</span>
-      </h1>
-      
-      <!-- Subtitle -->
+      <h1 class="hero-title">HireWithSuraj <span class="ai-glow">AI</span><span>by Suraj Singh</span></h1>
       <div class="hero-sub">“Recruiting the Architects of the AI Future.”</div>
-      
-      <!-- Buttons -->
       <div class="hero-buttons">
         <a href="#companies" class="btn-primary">Explore Clients</a>
         <a href="#resume" class="btn-secondary">View Resume →</a>
@@ -1577,22 +1588,10 @@
   <!-- DASHBOARD -->
   <section>
     <div class="dashboard-grid">
-      <div class="metric-glow reveal-hidden">
-        <div class="metric-number">500+</div>
-        <div class="metric-label">Tech Roles Closed</div>
-      </div>
-      <div class="metric-glow reveal-hidden">
-        <div class="metric-number">94%</div>
-        <div class="metric-label">Offer Acceptance</div>
-      </div>
-      <div class="metric-glow reveal-hidden">
-        <div class="metric-number">12d</div>
-        <div class="metric-label">Avg Time-to-Hire</div>
-      </div>
-      <div class="metric-glow reveal-hidden">
-        <div class="metric-number">20+</div>
-        <div class="metric-label">Enterprise Clients</div>
-      </div>
+      <div class="metric-glow reveal-hidden"><div class="metric-number">500+</div><div class="metric-label">Tech Roles Closed</div></div>
+      <div class="metric-glow reveal-hidden"><div class="metric-number">94%</div><div class="metric-label">Offer Acceptance</div></div>
+      <div class="metric-glow reveal-hidden"><div class="metric-number">12d</div><div class="metric-label">Avg Time-to-Hire</div></div>
+      <div class="metric-glow reveal-hidden"><div class="metric-number">20+</div><div class="metric-label">Enterprise Clients</div></div>
     </div>
   </section>
 
@@ -1659,7 +1658,7 @@
       <div class="subtitle">Engineering Hiring Leader | MCP, Agentic AI & GenAI Recruiter | AI-Driven Talent Acquisition</div>
       <div class="contact-info">
         <span><i class="ti ti-map-pin"></i> Indore, Madhya Pradesh, India</span>
-        <span><i class="ti ti-mail"></i> suraj.singh@bayonesolutions.com</span>
+        <span><i class="ti ti-mail"></i> surajsingh.work.01@gmail.com</span>
         <span><i class="ti ti-brand-linkedin"></i> linkedin.com/in/surajsingh-ai</span>
       </div>
 
@@ -1696,7 +1695,6 @@
 
       <div class="resume-item">
         <h3>PROFESSIONAL EXPERIENCE</h3>
-        
         <div class="company">BayOne Solutions | Lead Talent Partner (AI & Engineering Hiring) <span>June 2022 - Present</span></div>
         <ul>
           <li>Lead end-to-end recruitment for AI, GenAI, MCP, Agentic AI, Data, Cloud, Backend, Frontend, Full Stack, DevOps, and Enterprise Architecture roles.</li>
@@ -1705,20 +1703,17 @@
           <li>Leverage AI-driven recruiting strategies using Claude, ChatGPT, prompt engineering, and custom GPT workflows.</li>
           <li>Support enterprise clients including Sephora, Walmart, JPMorgan Chase, HPE, Albertsons, Woven, Shipt, McGrath RentCorp, and Hims & Hers Health.</li>
         </ul>
-
         <div class="company" style="margin-top:0.6rem;">AMISEQ | Senior Technical Recruiter <span>July 2021 - June 2022</span></div>
         <ul>
           <li>Managed complete recruitment lifecycle including sourcing, screening, interview coordination, offer management, and onboarding.</li>
           <li>Supported major client engagements including Walmart, Meta, and Equinix.</li>
           <li>Built pipelines across Backend, Frontend, Full Stack, Cloud, DevOps, Data Engineering, Infrastructure, and Product roles.</li>
         </ul>
-
         <div class="company" style="margin-top:0.6rem;">Global Information Technology | Talent Acquisition Lead <span>August 2020 - July 2021</span></div>
         <ul>
           <li>Led recruitment strategy for Analytics, Cloud, Data Platforms, and emerging technology roles.</li>
           <li>Managed recruiting teams and improved sourcing efficiency through market intelligence and process optimization.</li>
         </ul>
-
         <div class="company" style="margin-top:0.6rem;">Vertisystem | Senior IT Recruiter <span>2018 - 2019</span></div>
         <ul>
           <li>Managed full-cycle IT recruitment across software development lifecycle and infrastructure domains.</li>
@@ -1774,7 +1769,7 @@
   <section id="postjob">
     <div class="section-title reveal-hidden"><i class="ti ti-briefcase"></i> 📋 POST A JOB REQUIREMENT</div>
     <div class="glass-card reveal-hidden" style="padding:1.2rem;">
-      <p style="color:var(--text-secondary); font-size:0.8rem; margin-bottom:1rem;">Hiring for AI, GenAI, MCP, Agentic AI, Cloud, or Engineering roles? Fill this out and it'll open in your email app, ready to send straight to my inbox — no sign-up needed.</p>
+      <p style="color:var(--text-secondary); font-size:0.8rem; margin-bottom:1rem;">Hiring for AI, GenAI, MCP, Agentic AI, Cloud, or Engineering roles? Fill this out and it'll be sent directly to my inbox — no sign-up needed.</p>
 
       <label class="job-label">Company Name *</label>
       <input type="text" id="jobCompany" placeholder="e.g. Acme Corp" class="contact-input">
@@ -1831,25 +1826,55 @@
 
   <!-- CONTACT -->
   <section id="contact">
-    <div class="section-title reveal-hidden"><i class="ti ti-device-desktop"></i> 🎯 HIRE ELITE TALENT</div>
-    <div style="display: flex; flex-direction: column; gap: 1.2rem;">
-      <div class="glass-card reveal-hidden" style="padding:1rem;">
-        <h3 style="color:var(--text-primary); font-size:0.9rem; margin-bottom:0.6rem;">Send hiring request</h3>
-        <input type="text" id="clientName" placeholder="Your name / company" class="contact-input">
-        <input type="email" id="clientEmail" placeholder="Email" class="contact-input">
-        <textarea id="clientMessage" placeholder="Tell me about your hiring needs..." class="contact-input contact-textarea"></textarea>
-        <button id="sendInquiry" class="btn-primary" style="width:100%;">Send Inquiry</button>
-        <div id="inquiryMsg" style="margin-top:0.6rem; color:var(--text-secondary); font-size:0.7rem;"></div>
+    <div class="section-title reveal-hidden"><i class="ti ti-phone"></i> 📞 CONNECT WITH ME</div>
+    
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; margin-bottom:2rem;">
+      <div class="glass-card reveal-hidden" style="padding:1.2rem; text-align:center; cursor:pointer;" onclick="window.location.href='mailto:surajsingh.work.01@gmail.com'">
+        <i class="ti ti-mail" style="font-size:2rem; color:var(--primary);"></i>
+        <h4 style="color:var(--text-primary); margin-top:0.5rem; font-size:0.9rem;">Email</h4>
+        <p style="color:var(--text-muted); font-size:0.65rem;">surajsingh.work.01@gmail.com</p>
+        <span style="color:var(--primary); font-size:0.6rem;">Click to email →</span>
       </div>
-      <div class="glass-card reveal-hidden" style="padding:1rem;">
-        <div style="color:var(--text-primary); margin-bottom:0.4rem;"><i class="ti ti-message-circle"></i> <strong>AI Talent Assistant</strong></div>
-        <div class="chat-messages" id="chatMessages">
-          <div style="color:var(--text-muted);">🤖: Ask about MCP, Agentic AI, or sourcing strategies.</div>
-        </div>
-        <div class="chat-input">
-          <input type="text" id="chatInput" placeholder="Ask me...">
-          <button id="sendChat" class="btn-primary" style="padding:0.3rem 0.6rem;">Send</button>
-        </div>
+      
+      <div class="glass-card reveal-hidden" style="padding:1.2rem; text-align:center; cursor:pointer;" onclick="window.open('https://linkedin.com/in/surajsingh-ai', '_blank')">
+        <i class="ti ti-brand-linkedin" style="font-size:2rem; color:#0a66ff;"></i>
+        <h4 style="color:var(--text-primary); margin-top:0.5rem; font-size:0.9rem;">LinkedIn</h4>
+        <p style="color:var(--text-muted); font-size:0.65rem;">Connect with me</p>
+        <span style="color:#0a66ff; font-size:0.6rem;">Open profile →</span>
+      </div>
+      
+      <div class="glass-card reveal-hidden" style="padding:1.2rem; text-align:center;" onclick="document.getElementById('contactForm').scrollIntoView({behavior:'smooth'})">
+        <i class="ti ti-message" style="font-size:2rem; color:var(--secondary);"></i>
+        <h4 style="color:var(--text-primary); margin-top:0.5rem; font-size:0.9rem;">Direct Message</h4>
+        <p style="color:var(--text-muted); font-size:0.65rem;">Send me a message</p>
+        <span style="color:var(--secondary); font-size:0.6rem;">Click to message →</span>
+      </div>
+    </div>
+
+    <div id="contactForm" class="glass-card reveal-hidden" style="padding:1.2rem;">
+      <h3 style="color:var(--text-primary); font-size:1rem; margin-bottom:0.6rem;"><i class="ti ti-send"></i> Send Direct Message</h3>
+      <p style="color:var(--text-secondary); font-size:0.75rem; margin-bottom:1rem;">Fill this out and it will open your email app with a pre-filled message to me.</p>
+      
+      <input type="text" id="contactName" placeholder="Your name *" class="contact-input">
+      <input type="email" id="contactEmail" placeholder="Your email *" class="contact-input">
+      <input type="text" id="contactSubject" placeholder="Subject (e.g., Hiring Inquiry)" class="contact-input">
+      <textarea id="contactMessage" placeholder="Your message here..." class="contact-input contact-textarea" style="min-height:100px;"></textarea>
+      
+      <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
+        <button id="sendContactMessage" class="btn-primary" style="flex:1; min-width:120px;"><i class="ti ti-mail"></i> Send Message</button>
+        <button onclick="window.open('https://linkedin.com/in/surajsingh-ai', '_blank')" class="btn-secondary" style="flex:1; min-width:120px;"><i class="ti ti-brand-linkedin"></i> Connect on LinkedIn</button>
+      </div>
+      <div id="contactMsg" style="margin-top:0.6rem; color:var(--text-secondary); font-size:0.7rem;"></div>
+    </div>
+
+    <div class="glass-card reveal-hidden" style="padding:1rem; margin-top:1.2rem;">
+      <div style="color:var(--text-primary); margin-bottom:0.4rem;"><i class="ti ti-message-circle"></i> <strong>AI Talent Assistant</strong> <span style="font-size:0.6rem; color:var(--text-muted);">- Ask me anything</span></div>
+      <div class="chat-messages" id="chatMessages">
+        <div style="color:var(--text-muted);">🤖: Ask about MCP, Agentic AI, or sourcing strategies.</div>
+      </div>
+      <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="Ask me...">
+        <button id="sendChat" class="btn-primary" style="padding:0.3rem 0.6rem;">Send</button>
       </div>
     </div>
   </section>
@@ -1858,14 +1883,15 @@
 <!-- ==================== THEME DRAWER ==================== -->
 <div class="theme-drawer" id="themeDrawer">
   <div class="theme-drawer-header">
-    <span class="theme-drawer-title">🎨 Theme Customizer</span>
+    <span class="theme-drawer-title">🎨 Theme Customizer <span class="admin-badge">🔑 Admin Only</span></span>
     <button class="theme-drawer-close" id="themeDrawerClose">✕</button>
   </div>
-
-  <div class="theme-drawer-grid" id="themeDrawerGrid">
-    <!-- Theme buttons will be rendered by JS -->
+  <div class="admin-only-message">
+    <i class="ti ti-lock" style="font-size:1.5rem; display:block; margin-bottom:0.5rem;"></i>
+    <p>Theme customization is restricted to admin only.</p>
+    <p style="font-size:0.7rem; margin-top:0.3rem;">Click the 🔐 Admin button in the bottom-right to login.</p>
   </div>
-
+  <div class="theme-drawer-grid" id="themeDrawerGrid"></div>
   <div class="custom-color-section">
     <label>Custom Color</label>
     <input type="color" id="customColorPicker" value="#e50914">
@@ -1987,7 +2013,7 @@ function createParticles() {
 createParticles();
 
 // ========================================================================
-// 3. ADMIN SYSTEM & PROFILE PICTURE
+// 3. ADMIN SYSTEM
 // ========================================================================
 let isAdmin = false;
 const ADMIN_PASSWORD = 'SurajAdmin2026';
@@ -1995,21 +2021,25 @@ const ADMIN_PASSWORD = 'SurajAdmin2026';
 const profileUpload = document.getElementById('profileUpload');
 const profileImage = document.getElementById('profileImage');
 const profileUploadOverlay = document.getElementById('profileUploadOverlay');
+const navThemeBtn = document.getElementById('navThemeBtn');
+const themeDrawer = document.getElementById('themeDrawer');
 
-// Admin functions
 function enableAdmin() {
   isAdmin = true;
-  // Show profile upload overlay for admin
   profileUploadOverlay.classList.add('admin-mode');
+  navThemeBtn.classList.add('admin-mode');
+  themeDrawer.classList.add('admin-mode');
   document.getElementById('adminLink').textContent = '🚪 Logout';
   document.getElementById('adminLink').onclick = logoutAdmin;
-  // Re-render blogs with admin controls
   renderBlogs();
+  loadSavedTheme();
 }
 
 function logoutAdmin() {
   isAdmin = false;
   profileUploadOverlay.classList.remove('admin-mode');
+  navThemeBtn.classList.remove('admin-mode');
+  themeDrawer.classList.remove('admin-mode');
   document.getElementById('adminLink').textContent = '🔐 Admin';
   document.getElementById('adminLink').onclick = adminClick;
   renderBlogs();
@@ -2029,7 +2059,6 @@ function adminClick() {
 }
 document.getElementById('adminLink').onclick = adminClick;
 
-// Profile upload - only works in admin mode
 profileUpload.addEventListener('change', function(e) {
   if (!isAdmin) {
     alert('Only admin can change the profile picture.');
@@ -2047,14 +2076,13 @@ profileUpload.addEventListener('change', function(e) {
   }
 });
 
-// Load saved profile image
 const savedImage = localStorage.getItem('profileImage');
 if (savedImage) {
   profileImage.src = savedImage;
 }
 
 // ========================================================================
-// 4. THEME SYSTEM
+// 4. THEME SYSTEM - Admin Only
 // ========================================================================
 const themePresets = [
   { id: 'default', name: 'Red', color: '#e50914' },
@@ -2077,6 +2105,10 @@ const themeColors = {
 };
 
 function applyTheme(themeId, customColor = null) {
+  if (!isAdmin && !customColor) {
+    return;
+  }
+  
   let colors;
   if (customColor) {
     colors = {
@@ -2140,6 +2172,18 @@ function applyTheme(themeId, customColor = null) {
   });
 }
 
+function loadSavedTheme() {
+  const savedTheme = localStorage.getItem('talentverse-theme');
+  const customColor = localStorage.getItem('talentverse-custom-color');
+  if (customColor && savedTheme === 'custom') {
+    applyTheme('custom', customColor);
+  } else if (savedTheme && savedTheme !== 'custom') {
+    applyTheme(savedTheme);
+  } else {
+    applyTheme('default');
+  }
+}
+
 // ========================================================================
 // 5. THEME DRAWER
 // ========================================================================
@@ -2155,6 +2199,10 @@ function renderThemeDrawer() {
       <span class="theme-name">${theme.name}</span>
     `;
     btn.addEventListener('click', () => {
+      if (!isAdmin) {
+        alert('Only admin can change the theme!');
+        return;
+      }
       applyTheme(theme.id);
       closeThemeDrawer();
     });
@@ -2163,22 +2211,36 @@ function renderThemeDrawer() {
 }
 renderThemeDrawer();
 
-const navThemeBtn = document.getElementById('navThemeBtn');
 const navThemeBtnMobile = document.getElementById('navThemeBtnMobile');
-const themeDrawer = document.getElementById('themeDrawer');
 const themeDrawerClose = document.getElementById('themeDrawerClose');
 
-function openThemeDrawer() { themeDrawer.classList.add('open'); }
+function openThemeDrawer() { 
+  if (!isAdmin) {
+    themeDrawer.classList.add('open');
+    return;
+  }
+  themeDrawer.classList.add('open'); 
+}
 function closeThemeDrawer() { themeDrawer.classList.remove('open'); }
 
 navThemeBtn.addEventListener('click', (e) => {
   e.stopPropagation();
+  if (!isAdmin) {
+    themeDrawer.classList.toggle('open');
+    return;
+  }
   themeDrawer.classList.toggle('open');
 });
+
 navThemeBtnMobile.addEventListener('click', (e) => {
   e.stopPropagation();
+  if (!isAdmin) {
+    themeDrawer.classList.toggle('open');
+    return;
+  }
   themeDrawer.classList.toggle('open');
 });
+
 themeDrawerClose.addEventListener('click', closeThemeDrawer);
 
 document.addEventListener('click', (e) => {
@@ -2194,26 +2256,20 @@ document.addEventListener('click', (e) => {
 });
 
 document.getElementById('customColorPicker').addEventListener('input', function() {
+  if (!isAdmin) {
+    alert('Only admin can change the theme color!');
+    this.value = document.getElementById('colorHexDisplay').textContent;
+    return;
+  }
   const color = this.value;
   document.getElementById('colorHexDisplay').textContent = color;
   applyTheme('custom', color);
 });
 
-// ========================================================================
-// 6. LOAD SAVED THEME
-// ========================================================================
-const savedTheme = localStorage.getItem('talentverse-theme');
-const customColor = localStorage.getItem('talentverse-custom-color');
-if (customColor && savedTheme === 'custom') {
-  applyTheme('custom', customColor);
-} else if (savedTheme && savedTheme !== 'custom') {
-  applyTheme(savedTheme);
-} else {
-  applyTheme('default');
-}
+loadSavedTheme();
 
 // ========================================================================
-// 7. REVEAL ON SCROLL
+// 6. REVEAL ON SCROLL
 // ========================================================================
 const hiddenElements = document.querySelectorAll('.reveal-hidden');
 const observer = new IntersectionObserver((entries) => {
@@ -2227,7 +2283,7 @@ const observer = new IntersectionObserver((entries) => {
 hiddenElements.forEach(el => observer.observe(el));
 
 // ========================================================================
-// 8. MOBILE NAV
+// 7. MOBILE NAV
 // ========================================================================
 const mobileToggle = document.getElementById('mobileToggle');
 const navLinksMobile = document.getElementById('navLinksMobile');
@@ -2241,18 +2297,19 @@ document.querySelectorAll('.nav-link').forEach(link => {
 });
 
 // ========================================================================
-// 9. CONTACT & CHAT
+// 8. CONTACT & CHAT
 // ========================================================================
-const RECRUITER_EMAIL = 'suraj.singh@bayonesolutions.com';
+const RECRUITER_EMAIL = 'surajsingh.work.01@gmail.com';
 
-document.getElementById('sendInquiry')?.addEventListener('click', () => {
-  const name = document.getElementById('clientName').value.trim();
-  const email = document.getElementById('clientEmail').value.trim();
-  const message = document.getElementById('clientMessage')?.value.trim() || '';
-  const msgEl = document.getElementById('inquiryMsg');
+document.getElementById('sendContactMessage')?.addEventListener('click', () => {
+  const name = document.getElementById('contactName').value.trim();
+  const email = document.getElementById('contactEmail').value.trim();
+  const subject = document.getElementById('contactSubject').value.trim() || 'Hiring Inquiry';
+  const message = document.getElementById('contactMessage').value.trim();
+  const msgEl = document.getElementById('contactMsg');
 
-  if (!name || !email) {
-    msgEl.innerHTML = '⚠️ Please provide your name and email.';
+  if (!name || !email || !message) {
+    msgEl.innerHTML = '⚠️ Please fill in your name, email, and message.';
     return;
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -2260,24 +2317,17 @@ document.getElementById('sendInquiry')?.addEventListener('click', () => {
     return;
   }
 
-  const subject = `Hiring Inquiry from ${name}`;
-  const body =
-`Name: ${name}
-Email: ${email}
-
-Message:
-${message || '(no additional message)'}`;
-
+  const body = `From: ${name}\nEmail: ${email}\n\nMessage:\n${message}`;
   const mailtoLink = `mailto:${RECRUITER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   window.location.href = mailtoLink;
 
-  msgEl.innerHTML = `✅ Opening your email app to send this to ${RECRUITER_EMAIL}. If nothing opens, email me directly at ${RECRUITER_EMAIL}.`;
-  document.getElementById('clientName').value = '';
-  document.getElementById('clientEmail').value = '';
-  if (document.getElementById('clientMessage')) document.getElementById('clientMessage').value = '';
+  msgEl.innerHTML = `✅ Opening your email app to send to ${RECRUITER_EMAIL}.`;
+  document.getElementById('contactName').value = '';
+  document.getElementById('contactEmail').value = '';
+  document.getElementById('contactSubject').value = '';
+  document.getElementById('contactMessage').value = '';
 });
 
-// ---- POST A JOB REQUIREMENT ----
 document.getElementById('submitJob')?.addEventListener('click', () => {
   const company = document.getElementById('jobCompany').value.trim();
   const title = document.getElementById('jobTitle').value.trim();
@@ -2302,38 +2352,15 @@ document.getElementById('submitJob')?.addEventListener('click', () => {
   }
 
   const subject = `New Job Requirement: ${title} @ ${company}`;
-  const body =
-`A new job requirement was submitted via HireWithSuraj AI.
-
-COMPANY: ${company}
-JOB TITLE: ${title}
-EMPLOYMENT TYPE: ${type}
-LOCATION: ${location || 'Not specified'}
-EXPERIENCE LEVEL: ${experience || 'Not specified'}
-BUDGET / RATE: ${budget || 'Not specified'}
-KEY SKILLS: ${skills || 'Not specified'}
-
-JOB DESCRIPTION:
-${description}
-
-SUBMITTED BY:
-Name: ${contactName}
-Email: ${contactEmail}
-Phone: ${contactPhone || 'Not provided'}`;
-
-  // Keep a local record of submitted job requirements
-  try {
-    const jobs = JSON.parse(localStorage.getItem('postedJobs') || '[]');
-    jobs.push({ company, title, type, location, experience, budget, skills, description, contactName, contactEmail, contactPhone, date: new Date().toISOString() });
-    localStorage.setItem('postedJobs', JSON.stringify(jobs));
-  } catch (e) { /* ignore storage errors */ }
+  const body = `A new job requirement was submitted via HireWithSuraj AI.\n\nCOMPANY: ${company}\nJOB TITLE: ${title}\nEMPLOYMENT TYPE: ${type}\nLOCATION: ${location || 'Not specified'}\nEXPERIENCE LEVEL: ${experience || 'Not specified'}\nBUDGET / RATE: ${budget || 'Not specified'}\nKEY SKILLS: ${skills || 'Not specified'}\n\nJOB DESCRIPTION:\n${description}\n\nSUBMITTED BY:\nName: ${contactName}\nEmail: ${contactEmail}\nPhone: ${contactPhone || 'Not provided'}`;
 
   const mailtoLink = `mailto:${RECRUITER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   window.location.href = mailtoLink;
 
-  jobMsgEl.innerHTML = `✅ Opening your email app to send this requirement to ${RECRUITER_EMAIL}. If nothing opens, copy the details and email me directly.`;
+  jobMsgEl.innerHTML = `✅ Opening your email app to send this requirement to ${RECRUITER_EMAIL}.`;
 });
 
+// AI Chat
 const chatDiv = document.getElementById('chatMessages');
 const chatInput = document.getElementById('chatInput');
 const sendChatBtn = document.getElementById('sendChat');
@@ -2353,6 +2380,8 @@ function botReply(msg) {
   else if (m.includes('agentic')) reply = 'Agentic AI roles are hot right now! I\'ve placed 15+ Agentic AI Engineers in the last 6 months.';
   else if (m.includes('genai') || m.includes('generative')) reply = 'GenAI is my specialty! I source LLM Engineers, AI Product Managers, and GenAI Specialists.';
   else if (m.includes('cloud')) reply = 'Cloud hiring is strong - AWS, Azure, GCP. I\'ve closed 40+ cloud roles in 2025.';
+  else if (m.includes('hello') || m.includes('hi')) reply = 'Hello! How can I help you with your hiring needs today?';
+  else if (m.includes('job') || m.includes('hiring')) reply = 'I specialize in AI, MCP, Agentic AI, Cloud, and Engineering roles. Send me your requirements!';
   else reply = 'I specialize in MCP, GenAI, Cloud leadership, and AI recruiting. Ask me anything about tech hiring!';
   addMsg('🤖 AI Assistant', reply);
 }
@@ -2368,7 +2397,7 @@ sendChatBtn.addEventListener('click', handleChat);
 chatInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleChat(); });
 
 // ========================================================================
-// 10. BLOG
+// 9. BLOG
 // ========================================================================
 const defaultBlogs = [
   { id: 1, title: "How to Source MCP Architects with GPT-4o", content: "Full guide: Using Boolean + GPT-4o prompts to discover MCP (Model Context Protocol) engineers. I generated a search string combining 'LangChain', 'vector databases', and 'agentic workflows'. Result: 47 qualified candidates from GitHub + LinkedIn in under 2 hours. This technique reduced our sourcing time by 70%.", tags: ["#AISourcing", "#MCP"], date: "2025-03-15" },
@@ -2420,7 +2449,8 @@ function renderBlogs() {
 }
 
 window.editBlog = (id) => {
-  const newTitle = prompt('Edit title');
+  if (!isAdmin) { alert('Only admin can edit blogs.'); return; }
+  const newTitle = prompt('Edit title:');
   if (newTitle) {
     let blogs = loadBlogs();
     let blog = blogs.find(b => b.id === id);
@@ -2430,6 +2460,7 @@ window.editBlog = (id) => {
   }
 };
 window.deleteBlog = (id) => {
+  if (!isAdmin) { alert('Only admin can delete blogs.'); return; }
   if (confirm('Delete permanently?')) {
     let blogs = loadBlogs().filter(b => b.id !== id);
     saveBlogs(blogs);
@@ -2451,14 +2482,443 @@ window.onclick = (e) => {
 renderBlogs();
 
 // ========================================================================
-// 11. RESUME DOWNLOAD - DOCX ONLY
+// 10. RESUME DOWNLOAD - PROPER DOCX USING docx.js library
 // ========================================================================
-function downloadResumeDOCX() {
-  const resumeText = `Suraj Singh
+async function downloadResumeDOCX() {
+  try {
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, convertInchesToTwip } = docx;
+    
+    const doc = new Document({
+      sections: [{
+        properties: {
+          page: {
+            margin: {
+              top: convertInchesToTwip(1),
+              bottom: convertInchesToTwip(1),
+              left: convertInchesToTwip(1),
+              right: convertInchesToTwip(1)
+            }
+          }
+        },
+        children: [
+          // Name
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Suraj Singh",
+                size: 28,
+                bold: true,
+                font: "Arial"
+              })
+            ],
+            alignment: AlignmentType.CENTER
+          }),
+          
+          // Title
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Engineering Hiring Leader | MCP, Agentic AI & GenAI Recruiter | AI-Driven Talent Acquisition",
+                size: 20,
+                font: "Arial"
+              })
+            ],
+            alignment: AlignmentType.CENTER
+          }),
+          
+          // Contact info with updated email
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Indore, Madhya Pradesh, India | Email: surajsingh.work.01@gmail.com | LinkedIn: linkedin.com/in/surajsingh-ai",
+                size: 18,
+                font: "Arial"
+              })
+            ],
+            alignment: AlignmentType.CENTER
+          }),
+          
+          // Spacer
+          new Paragraph({ children: [] }),
+          
+          // PROFESSIONAL SUMMARY
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "PROFESSIONAL SUMMARY",
+                size: 22,
+                bold: true,
+                font: "Arial"
+              })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Engineering Hiring Leader with 7+ years of experience in global technical recruitment, specializing in AI, Generative AI, MCP, Agentic AI, AI/ML, Cloud, Data Engineering, Product, and Enterprise Technology hiring across North America, APAC, and LATAM. Partnered with enterprise and FAANG-adjacent organizations including Sephora, Walmart, JPMorgan Chase, HPE, Albertsons, Meta, Equinix, Samsung, Airbnb, Sony, and GoPro to build high-performing engineering and product teams.",
+                size: 20,
+                font: "Arial"
+              })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Strong expertise in AI-driven recruiting, technical sourcing, stakeholder partnership, talent intelligence, candidate engagement, and hiring strategy. Hands-on experience using ChatGPT, Claude, prompt engineering, and custom GPT workflows to improve recruiting efficiency.",
+                size: 20,
+                font: "Arial"
+              })
+            ]
+          }),
+          
+          // Spacer
+          new Paragraph({ children: [] }),
+          
+          // AI & EMERGING TECHNOLOGY EXPERTISE
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "AI & EMERGING TECHNOLOGY EXPERTISE",
+                size: 22,
+                bold: true,
+                font: "Arial"
+              })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• MCP (Model Context Protocol) & Agentic AI Talent Hiring", size: 20, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Generative AI (GenAI), LLM Engineering & AI Product Hiring", size: 20, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• AI Engineers, AI Architects, Data Engineers & AI/ML Specialists", size: 20, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Prompt Engineering & AI-powered recruitment workflows", size: 20, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• ChatGPT, Claude, Gemini, Custom GPT workflows", size: 20, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• RAG, LLM, AI Platform and Enterprise AI ecosystem hiring", size: 20, font: "Arial" })
+            ]
+          }),
+          
+          // Spacer
+          new Paragraph({ children: [] }),
+          
+          // CORE COMPETENCIES
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "CORE COMPETENCIES",
+                size: 22,
+                bold: true,
+                font: "Arial"
+              })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Full Life Cycle Recruiting (Contract, C2H, FTE)", size: 20, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Engineering, Product, Data, Cloud & AI Hiring", size: 20, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Hiring Manager & Client Relationship Management", size: 20, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Strategic Sourcing & Market Mapping", size: 20, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• LinkedIn Recruiter, Dice, GitHub, Stack Overflow", size: 20, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• ATS/VMS: JobDiva, Ceipal, Workday, Fieldglass", size: 20, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Interview Management, Offer Negotiation & Delivery Leadership", size: 20, font: "Arial" })
+            ]
+          }),
+          
+          // Spacer
+          new Paragraph({ children: [] }),
+          
+          // PROFESSIONAL EXPERIENCE
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "PROFESSIONAL EXPERIENCE",
+                size: 22,
+                bold: true,
+                font: "Arial"
+              })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "BayOne Solutions | Lead Talent Partner (AI & Engineering Hiring) | June 2022 - Present",
+                size: 20,
+                bold: true,
+                font: "Arial"
+              })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Lead end-to-end recruitment for AI, GenAI, MCP, Agentic AI, Data, Cloud, Backend, Frontend, Full Stack, DevOps, and Enterprise Architecture roles.", size: 19, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Partner with Engineering Managers, Product Leaders, Architects, and business stakeholders to scale technology organizations.", size: 19, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Specialized hiring for MCP Architects, Agentic AI Engineers, AI Product Managers, GenAI Specialists, Lead Data Engineers, and AI-focused Data Architects.", size: 19, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Leverage AI-driven recruiting strategies using Claude, ChatGPT, prompt engineering, and custom GPT workflows.", size: 19, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Support enterprise clients including Sephora, Walmart, JPMorgan Chase, HPE, Albertsons, Woven, Shipt, McGrath RentCorp, and Hims & Hers Health.", size: 19, font: "Arial" })
+            ]
+          }),
+          
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "AMISEQ | Senior Technical Recruiter | July 2021 - June 2022",
+                size: 20,
+                bold: true,
+                font: "Arial"
+              })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Managed complete recruitment lifecycle including sourcing, screening, interview coordination, offer management, and onboarding.", size: 19, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Supported major client engagements including Walmart, Meta, and Equinix.", size: 19, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Built pipelines across Backend, Frontend, Full Stack, Cloud, DevOps, Data Engineering, Infrastructure, and Product roles.", size: 19, font: "Arial" })
+            ]
+          }),
+          
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Global Information Technology | Talent Acquisition Lead | August 2020 - July 2021",
+                size: 20,
+                bold: true,
+                font: "Arial"
+              })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Led recruitment strategy for Analytics, Cloud, Data Platforms, and emerging technology roles.", size: 19, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Managed recruiting teams and improved sourcing efficiency through market intelligence and process optimization.", size: 19, font: "Arial" })
+            ]
+          }),
+          
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Vertisystem | Senior IT Recruiter | 2018 - 2019",
+                size: 20,
+                bold: true,
+                font: "Arial"
+              })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Managed full-cycle IT recruitment across software development lifecycle and infrastructure domains.", size: 19, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Handled sourcing, candidate engagement, negotiations, and client delivery.", size: 19, font: "Arial" })
+            ]
+          }),
+          
+          // Spacer
+          new Paragraph({ children: [] }),
+          
+          // RECOGNITION & AWARDS
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "RECOGNITION & AWARDS",
+                size: 22,
+                bold: true,
+                font: "Arial"
+              })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• The Growth Accelerator Award --- Quarter 1 2026", size: 20, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• The Money Magnet Award --- Quarter 1 2026", size: 20, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• The Growth Accelerator Award --- February 2026", size: 20, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• The Sourcing Sentinel Award --- August 2025", size: 20, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• The Money Magnet Award --- September 2025", size: 20, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Growth Accelerator Award --- September 2025", size: 20, font: "Arial" })
+            ]
+          }),
+          
+          // Spacer
+          new Paragraph({ children: [] }),
+          
+          // CERTIFICATIONS
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "CERTIFICATIONS",
+                size: 22,
+                bold: true,
+                font: "Arial"
+              })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• AI-Driven Recruiting - LinkedIn Recruiter Power User Assessment (Issued July 2025)", size: 20, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• Employer Branding Certification - hirist", size: 20, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• MERN Stack & Advanced JavaScript Certifications", size: 20, font: "Arial" })
+            ]
+          }),
+          
+          // Spacer
+          new Paragraph({ children: [] }),
+          
+          // TECHNICAL BACKGROUND
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "TECHNICAL BACKGROUND",
+                size: 22,
+                bold: true,
+                font: "Arial"
+              })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "MERN Stack Development: MongoDB, Express.js, React.js, Node.js, JavaScript, HTML, CSS, GitHub", size: 20, font: "Arial" })
+            ]
+          }),
+          
+          // Spacer
+          new Paragraph({ children: [] }),
+          
+          // EDUCATION
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "EDUCATION",
+                size: 22,
+                bold: true,
+                font: "Arial"
+              })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Bachelor of Engineering (B.E.) - Information Technology", size: 20, font: "Arial" })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({ text: "Rustamji Institute of Technology", size: 20, font: "Arial" })
+            ]
+          })
+        ]
+      }]
+    });
+
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, 'Suraj_Singh_Detailed_AI_Resume_With_Awards.docx');
+    
+  } catch (error) {
+    console.error('Download error:', error);
+    // Fallback: Try plain text download
+    try {
+      const resumeText = `Suraj Singh
 
 Engineering Hiring Leader | MCP, Agentic AI & GenAI Recruiter | AI-Driven Talent Acquisition
 
-Indore, Madhya Pradesh, India | Email: suraj.singh@bayonesolutions.com | LinkedIn: linkedin.com/in/surajsingh-ai
+Indore, Madhya Pradesh, India | Email: surajsingh.work.01@gmail.com | LinkedIn: linkedin.com/in/surajsingh-ai
 
 PROFESSIONAL SUMMARY
 
@@ -2535,12 +2995,16 @@ EDUCATION
 Bachelor of Engineering (B.E.) - Information Technology
 Rustamji Institute of Technology`;
 
-  const blob = new Blob([resumeText], { type: 'application/msword;charset=utf-8' });
-  saveAs(blob, 'Suraj_Singh_Detailed_AI_Resume_With_Awards.docx');
+      const blob = new Blob([resumeText], { type: 'application/msword;charset=utf-8' });
+      saveAs(blob, 'Suraj_Singh_Detailed_AI_Resume_With_Awards.docx');
+    } catch (fallbackError) {
+      alert('Error downloading resume. Please use the Print option instead.');
+    }
+  }
 }
 
 // ========================================================================
-// 12. SMOOTH SCROLL
+// 11. SMOOTH SCROLL
 // ========================================================================
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   anchor.addEventListener('click', function(e) {
