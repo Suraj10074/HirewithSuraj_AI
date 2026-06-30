@@ -1,0 +1,2559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>HireWithSuraj AI | AI Recruiter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.30.0/dist/tabler-icons.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Theme Variables */
+    :root {
+      --primary: #e50914;
+      --primary-dark: #ff2a2a;
+      --primary-light: rgba(229,9,20,0.15);
+      --primary-glow: rgba(229,9,20,0.3);
+      --secondary: #0a66ff;
+      --bg-primary: #05050A;
+      --bg-card: rgba(12, 12, 20, 0.55);
+      --text-primary: #ededed;
+      --text-secondary: #ccc;
+      --text-muted: #aaa;
+      --border-color: rgba(229,9,20,0.35);
+      --gradient-start: #fff;
+      --gradient-mid: #e50914;
+      --gradient-end: #0a66ff;
+      --shadow-color: rgba(229,9,20,0.7);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      transition: background-color 0.5s ease, color 0.5s ease;
+      padding-bottom: 80px;
+    }
+
+    /* ==================== ANIMATED BACKGROUND ==================== */
+    #orb-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .particle-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--primary);
+      opacity: 0.12;
+      animation: floatParticle 20s infinite linear;
+      transition: background 0.5s ease;
+    }
+    @keyframes floatParticle {
+      0% { transform: translateY(100vh) rotate(0deg) scale(0); opacity: 0; }
+      10% { opacity: 0.12; }
+      90% { opacity: 0.12; }
+      100% { transform: translateY(-100vh) rotate(720deg) scale(1); opacity: 0; }
+    }
+
+    .bg-glow {
+      position: fixed;
+      top: 20%;
+      left: -10%;
+      width: 80%;
+      height: 80%;
+      background: radial-gradient(circle, var(--primary-glow), transparent 70%);
+      filter: blur(80px);
+      z-index: 0;
+      animation: floatGlow 14s infinite alternate;
+      transition: background 0.5s ease;
+    }
+    .bg-glow-2 {
+      position: fixed;
+      bottom: 10%;
+      right: -10%;
+      width: 70%;
+      height: 70%;
+      background: radial-gradient(circle, var(--secondary), transparent 70%);
+      filter: blur(100px);
+      z-index: 0;
+      animation: floatGlowReverse 18s infinite alternate;
+      transition: background 0.5s ease;
+    }
+    .bg-glow-3 {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60%;
+      height: 60%;
+      background: radial-gradient(circle, var(--primary-light), transparent 70%);
+      filter: blur(120px);
+      z-index: 0;
+      animation: pulseGlow 8s infinite alternate;
+      transition: background 0.5s ease;
+    }
+    @keyframes floatGlow {
+      0% { transform: translate(0,0) scale(1); opacity:0.4; }
+      100% { transform: translate(5%,5%) scale(1.2); opacity:0.7; }
+    }
+    @keyframes floatGlowReverse {
+      0% { transform: translate(0,0) scale(1); opacity:0.3; }
+      100% { transform: translate(-8%,-5%) scale(1.3); opacity:0.6; }
+    }
+    @keyframes pulseGlow {
+      0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.15; }
+      100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.35; }
+    }
+
+    /* ==================== FLOATING GRAPH ==================== */
+    .floating-graph {
+      position: fixed;
+      bottom: 100px;
+      right: 10px;
+      width: 160px;
+      height: 100px;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      z-index: 1;
+      pointer-events: none;
+      animation: floatGraph 8s infinite alternate;
+      transition: border-color 0.5s ease;
+      display: none;
+    }
+    @media (min-width: 768px) {
+      .floating-graph {
+        display: block;
+        width: 220px;
+        height: 130px;
+        bottom: 110px;
+        right: 20px;
+      }
+    }
+    @keyframes floatGraph {
+      0% { transform: translateY(0px) rotate(0deg); }
+      100% { transform: translateY(-15px) rotate(1.5deg); }
+    }
+    .bar-animation {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      gap: 5px;
+      align-items: flex-end;
+      height: 55px;
+    }
+    .bar {
+      flex: 1;
+      background: linear-gradient(0deg, var(--primary), var(--primary-dark));
+      border-radius: 5px;
+      animation: barGrow 2s infinite alternate;
+      transition: background 0.5s ease;
+    }
+    .bar:nth-child(1) { height: 22px; animation-duration: 1.8s; }
+    .bar:nth-child(2) { height: 40px; animation-duration: 2.2s; }
+    .bar:nth-child(3) { height: 30px; animation-duration: 1.5s; }
+    .bar:nth-child(4) { height: 50px; animation-duration: 2.5s; }
+    @keyframes barGrow {
+      0% { opacity: 0.5; transform: scaleY(0.8); }
+      100% { opacity: 1; transform: scaleY(1.2); }
+    }
+
+    .skill-wheel {
+      position: fixed;
+      top: 15%;
+      left: 5px;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: conic-gradient(var(--primary) 0% 85%, var(--secondary) 85% 100%);
+      animation: rotateWheel 12s linear infinite;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.4;
+      transition: background 0.5s ease;
+    }
+    @media (min-width: 768px) {
+      .skill-wheel {
+        width: 110px;
+        height: 110px;
+        left: 3%;
+        top: 20%;
+      }
+    }
+    @keyframes rotateWheel {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* ==================== NAVBAR ==================== */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: rgba(5, 5, 10, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.6rem 1rem;
+      transition: border-color 0.5s ease;
+    }
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .logo {
+      font-size: 1.1rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid), var(--gradient-end));
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      transition: background 0.5s ease;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .logo .ai-badge {
+      font-size: 0.5rem;
+      background: var(--primary);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    @media (min-width: 768px) {
+      .logo { font-size: 1.5rem; gap: 8px; }
+      .logo .ai-badge { font-size: 0.6rem; padding: 2px 10px; }
+    }
+    .nav-links {
+      display: flex;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+      list-style: none;
+      align-items: center;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-weight: 500;
+      transition: 0.2s;
+      font-size: 0.65rem;
+      position: relative;
+      padding: 0.3rem 0.4rem;
+    }
+    @media (min-width: 768px) {
+      .nav-links a { font-size: 0.9rem; padding: 0.3rem 0.8rem; }
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -2px;
+      left: 0;
+      background: var(--primary);
+      transition: width 0.3s ease;
+    }
+    .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+    .nav-links a:hover { color: var(--primary); text-shadow: 0 0 6px var(--primary-glow); }
+
+    /* Theme button in navbar */
+    .nav-theme-btn {
+      background: none;
+      border: 2px solid var(--border-color);
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      padding: 0;
+      position: relative;
+    }
+    @media (min-width: 768px) {
+      .nav-theme-btn { width: 32px; height: 32px; }
+    }
+    .nav-theme-btn:hover {
+      border-color: var(--primary);
+      transform: scale(1.1);
+    }
+    .nav-theme-btn .color-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary);
+      transition: background 0.5s ease;
+    }
+    @media (min-width: 768px) {
+      .nav-theme-btn .color-dot { width: 22px; height: 22px; }
+    }
+    .nav-theme-btn .tooltip {
+      display: none;
+      position: absolute;
+      bottom: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.55rem;
+      white-space: nowrap;
+    }
+    .nav-theme-btn:hover .tooltip {
+      display: block;
+    }
+
+    .mobile-toggle {
+      display: block;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      cursor: pointer;
+      padding: 0.3rem;
+    }
+    @media (min-width: 768px) {
+      .mobile-toggle { display: none; }
+    }
+
+    /* Mobile Menu */
+    .nav-links-mobile {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      gap: 0.3rem;
+      padding: 0.5rem 0;
+      border-top: 1px solid var(--border-color);
+      margin-top: 0.5rem;
+    }
+    .nav-links-mobile.open {
+      display: flex;
+    }
+    .nav-links-mobile a {
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-weight: 500;
+      padding: 0.4rem 0.5rem;
+      border-radius: 8px;
+      transition: 0.2s;
+      font-size: 0.8rem;
+    }
+    .nav-links-mobile a:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+    .nav-links-mobile .nav-theme-btn-mobile {
+      background: none;
+      border: 2px solid var(--border-color);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      padding: 0;
+      margin: 0.3rem 0;
+    }
+    .nav-links-mobile .nav-theme-btn-mobile .color-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--primary);
+      transition: background 0.5s ease;
+    }
+
+    /* ==================== MAIN CONTENT ==================== */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      position: relative;
+      z-index: 5;
+    }
+    @media (min-width: 768px) {
+      .container { padding: 0 2rem; }
+    }
+
+    section {
+      padding: 2.5rem 0;
+      border-bottom: 1px solid var(--border-color);
+      scroll-margin-top: 70px;
+      transition: border-color 0.5s ease;
+    }
+    @media (min-width: 768px) {
+      section { padding: 5rem 0; }
+    }
+
+    .section-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-shadow: 0 0 10px var(--primary-glow);
+      transition: text-shadow 0.5s ease;
+      text-align: center;
+      flex-wrap: wrap;
+    }
+    @media (min-width: 768px) {
+      .section-title { font-size: 2.8rem; margin-bottom: 2.5rem; }
+    }
+
+    .grid-overlap {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.8rem;
+    }
+    @media (min-width: 768px) {
+      .grid-overlap { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 2rem; }
+    }
+
+    .glass-card, .company-card, .role-card, .award-card, .rec-card, .blog-card, .cert-card, .resume-section {
+      background: var(--bg-card);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      transition: all 0.4s cubic-bezier(0.2, 0.95, 0.4, 1.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    @media (min-width: 768px) {
+      .glass-card, .company-card, .role-card, .award-card, .rec-card, .blog-card, .cert-card, .resume-section {
+        border-radius: 32px;
+      }
+    }
+
+    .blog-card, .company-card, .role-card, .award-card, .cert-card, .rec-card { 
+      padding: 1rem; 
+      cursor: pointer; 
+    }
+    @media (min-width: 768px) {
+      .blog-card, .company-card, .role-card, .award-card, .cert-card, .rec-card { padding: 1.6rem; }
+    }
+
+    .blog-card:hover, .company-card:hover, .role-card:hover, .award-card:hover, .cert-card:hover, .rec-card:hover {
+      transform: translateY(-4px) scale(1.01);
+      border-color: var(--primary);
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+    @media (min-width: 768px) {
+      .blog-card:hover, .company-card:hover, .role-card:hover, .award-card:hover, .cert-card:hover, .rec-card:hover {
+        transform: translateY(-8px) scale(1.01);
+        box-shadow: 0 0 28px var(--primary-glow);
+      }
+    }
+
+    .reveal-hidden {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.9s cubic-bezier(0.2, 0.9, 0.4, 1.1), transform 0.8s ease;
+    }
+    .reveal-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ==================== HERO SECTION - FULLY CENTERED & RESPONSIVE ==================== */
+    #home {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 85vh;
+      padding: 2rem 0;
+    }
+
+    .hero-content {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Badge */
+    .hero-badge {
+      display: inline-block;
+      background: var(--bg-card);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border-color);
+      padding: 0.3rem 1.2rem;
+      border-radius: 40px;
+      margin-bottom: 0.8rem;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      transition: border-color 0.5s ease;
+    }
+    @media (min-width: 768px) {
+      .hero-badge {
+        padding: 0.4rem 1.8rem;
+        font-size: 0.9rem;
+        margin-bottom: 1.2rem;
+      }
+    }
+    .hero-badge span {
+      color: var(--primary);
+      font-weight: 700;
+      transition: color 0.5s ease;
+    }
+
+    /* Profile Picture - Centered */
+    .profile-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 0.8rem;
+    }
+    @media (min-width: 768px) {
+      .profile-wrapper { margin-bottom: 1.2rem; }
+    }
+
+    .profile-pic-container {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid var(--primary);
+      box-shadow: 0 0 35px var(--shadow-color);
+      animation: auraPulse 2s infinite alternate;
+      transition: border-color 0.5s ease, box-shadow 0.5s ease;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    @media (min-width: 480px) {
+      .profile-pic-container {
+        width: 150px;
+        height: 150px;
+      }
+    }
+    @media (min-width: 768px) {
+      .profile-pic-container {
+        width: 180px;
+        height: 180px;
+        border-width: 4px;
+      }
+    }
+    @keyframes auraPulse {
+      0% { box-shadow: 0 0 5px var(--primary); transform: scale(1); }
+      100% { box-shadow: 0 0 35px var(--primary); transform: scale(1.02); }
+    }
+
+    .profile-pic-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Rotating glow ring */
+    .profile-pic-container::after {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      right: -4px;
+      bottom: -4px;
+      border-radius: 50%;
+      background: conic-gradient(
+        from 0deg,
+        var(--primary),
+        var(--secondary),
+        var(--primary-dark),
+        var(--primary)
+      );
+      opacity: 0.3;
+      z-index: -1;
+      animation: spinGlow 4s linear infinite;
+    }
+    @keyframes spinGlow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Status badge */
+    .profile-status {
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      background: #10b981;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid var(--bg-primary);
+      z-index: 2;
+      animation: statusPulse 2s infinite;
+    }
+    @media (min-width: 768px) {
+      .profile-status {
+        width: 20px;
+        height: 20px;
+        bottom: 6px;
+        right: 6px;
+      }
+    }
+    @keyframes statusPulse {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    /* Admin Only - Profile upload overlay */
+    .profile-upload-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 6px 0;
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      cursor: pointer;
+      border-radius: 0 0 50% 50%;
+      height: 30%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .profile-pic-container:hover .profile-upload-overlay {
+      opacity: 1;
+    }
+    .profile-upload-overlay span {
+      color: white;
+      font-size: 0.5rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    @media (min-width: 768px) {
+      .profile-upload-overlay span { font-size: 0.65rem; gap: 6px; }
+    }
+    .profile-upload-overlay input {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+    /* Hidden by default - only shown when admin */
+    .profile-upload-overlay {
+      display: none;
+    }
+    .profile-upload-overlay.admin-mode {
+      display: flex;
+    }
+
+    /* Badge Premium */
+    .badge-premium {
+      background: linear-gradient(95deg, var(--primary), var(--primary-dark));
+      padding: 0.3rem 1rem;
+      border-radius: 40px;
+      font-size: 0.6rem;
+      font-weight: 700;
+      display: inline-block;
+      margin-bottom: 0.8rem;
+      box-shadow: 0 0 15px var(--primary);
+      animation: badgePulse 1.5s infinite;
+      transition: background 0.5s ease, box-shadow 0.5s ease;
+    }
+    @media (min-width: 768px) {
+      .badge-premium { padding: 0.4rem 1.5rem; font-size: 0.8rem; margin-bottom: 1.2rem; }
+    }
+    @keyframes badgePulse {
+      0% { opacity: 0.9; }
+      50% { opacity: 1; box-shadow: 0 0 20px var(--primary); }
+      100% { opacity: 0.9; }
+    }
+
+    /* Hero Title */
+    .hero-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid), var(--gradient-end));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.2;
+      text-align: center;
+    }
+    @media (min-width: 480px) {
+      .hero-title { font-size: 3rem; }
+    }
+    @media (min-width: 768px) {
+      .hero-title { font-size: 5rem; }
+    }
+    .hero-title span {
+      font-size: 0.9rem;
+      display: block;
+    }
+    @media (min-width: 480px) {
+      .hero-title span { font-size: 1.2rem; }
+    }
+    @media (min-width: 768px) {
+      .hero-title span { font-size: 2rem; display: inline; }
+    }
+    .hero-title .ai-glow {
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* Hero Subtitle */
+    .hero-sub {
+      font-size: 0.85rem;
+      margin: 0.6rem 0;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+    @media (min-width: 768px) {
+      .hero-sub { font-size: 1.5rem; margin: 1rem 0; }
+    }
+
+    /* Hero Buttons */
+    .hero-buttons {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 0.4rem;
+    }
+    @media (min-width: 768px) {
+      .hero-buttons { gap: 1.2rem; margin-top: 0.8rem; }
+    }
+
+    /* ==================== BUTTONS ==================== */
+    .btn-primary, .btn-secondary {
+      padding: 0.5rem 1.2rem;
+      border-radius: 40px;
+      font-weight: 700;
+      transition: all 0.3s;
+      display: inline-block;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.7rem;
+    }
+    @media (min-width: 768px) {
+      .btn-primary, .btn-secondary { padding: 0.8rem 2rem; font-size: 1rem; }
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 0 12px var(--primary-glow);
+      transition: background 0.5s ease, box-shadow 0.5s ease;
+    }
+    .btn-primary:hover { transform: scale(1.05); background: var(--primary-dark); }
+    .btn-secondary {
+      background: rgba(10,102,255,0.2);
+      border: 1px solid var(--secondary);
+      color: white;
+    }
+    .btn-secondary:hover { background: var(--secondary); transform: scale(1.03); }
+
+    /* ==================== DASHBOARD ==================== */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.6rem;
+    }
+    @media (min-width: 768px) {
+      .dashboard-grid { grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+    }
+
+    .metric-glow {
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(12px);
+      border-radius: 14px;
+      padding: 0.6rem;
+      text-align: center;
+      border: 1px solid var(--border-color);
+      transition: border-color 0.5s ease;
+    }
+    @media (min-width: 768px) {
+      .metric-glow { border-radius: 28px; padding: 1.3rem; }
+    }
+    .metric-number {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-shadow: 0 0 8px var(--primary-glow);
+      transition: color 0.5s ease, text-shadow 0.5s ease;
+    }
+    @media (min-width: 768px) {
+      .metric-number { font-size: 2.8rem; }
+    }
+    .metric-label {
+      font-size: 0.6rem;
+      color: var(--text-secondary);
+      margin-top: 0.2rem;
+    }
+    @media (min-width: 768px) {
+      .metric-label { font-size: 1rem; }
+    }
+
+    /* ==================== CLIENTS ==================== */
+    .client-logo-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 0.8rem 0;
+    }
+    @media (min-width: 768px) {
+      .client-logo-grid { gap: 1rem; margin: 2rem 0; }
+    }
+    .client-item {
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(5px);
+      padding: 0.3rem 0.6rem;
+      border-radius: 30px;
+      border: 1px solid var(--border-color);
+      transition: all 0.3s;
+      font-size: 0.6rem;
+    }
+    @media (min-width: 768px) {
+      .client-item { padding: 0.6rem 1.2rem; font-size: 1rem; }
+    }
+    .client-item:hover {
+      transform: scale(1.08);
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* ==================== RESUME ==================== */
+    .resume-section {
+      padding: 1.2rem;
+    }
+    @media (min-width: 768px) {
+      .resume-section { padding: 2.5rem; }
+    }
+    .resume-section h1 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 0.2rem;
+      transition: color 0.5s ease;
+      text-align: center;
+    }
+    @media (min-width: 768px) {
+      .resume-section h1 { font-size: 2.2rem; text-align: left; }
+    }
+    .resume-section .subtitle {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.3rem;
+      text-align: center;
+    }
+    @media (min-width: 768px) {
+      .resume-section .subtitle { font-size: 1.1rem; text-align: left; }
+    }
+    .resume-section .contact-info {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.6rem;
+      color: var(--text-muted);
+      font-size: 0.6rem;
+      margin-bottom: 0.8rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid var(--border-color);
+      transition: border-color 0.5s ease;
+    }
+    @media (min-width: 768px) {
+      .resume-section .contact-info { justify-content: flex-start; gap: 1.5rem; font-size: 0.9rem; margin-bottom: 1.5rem; padding-bottom: 1rem; }
+    }
+    .resume-item {
+      margin-bottom: 0.8rem;
+    }
+    @media (min-width: 768px) {
+      .resume-item { margin-bottom: 1.5rem; }
+    }
+    .resume-item h3 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.2rem;
+      transition: color 0.5s ease, border-color 0.5s ease;
+    }
+    @media (min-width: 768px) {
+      .resume-item h3 { font-size: 1.1rem; margin-bottom: 0.8rem; padding-bottom: 0.4rem; }
+    }
+    .resume-item p, .resume-item li {
+      color: var(--text-secondary);
+      line-height: 1.4;
+      font-size: 0.7rem;
+    }
+    @media (min-width: 768px) {
+      .resume-item p, .resume-item li { font-size: 0.95rem; line-height: 1.6; }
+    }
+    .resume-item ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    .resume-item ul li {
+      padding: 0.1rem 0 0.1rem 1rem;
+      position: relative;
+    }
+    @media (min-width: 768px) {
+      .resume-item ul li { padding: 0.2rem 0 0.2rem 1.5rem; }
+    }
+    .resume-item ul li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+      transition: color 0.5s ease;
+    }
+    .resume-item .company {
+      display: flex;
+      flex-direction: column;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.75rem;
+    }
+    @media (min-width: 768px) {
+      .resume-item .company { flex-direction: row; justify-content: space-between; font-size: 1rem; }
+    }
+    .resume-item .company span {
+      color: var(--primary);
+      font-weight: 400;
+      font-size: 0.6rem;
+      transition: color 0.5s ease;
+    }
+    @media (min-width: 768px) {
+      .resume-item .company span { font-size: 0.9rem; }
+    }
+
+    .resume-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+      justify-content: center;
+    }
+    @media (min-width: 768px) {
+      .resume-actions { gap: 1rem; margin-bottom: 2rem; justify-content: flex-start; }
+    }
+    .download-btn {
+      padding: 0.35rem 0.8rem;
+      border-radius: 25px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.6rem;
+    }
+    @media (min-width: 768px) {
+      .download-btn { padding: 0.6rem 1.5rem; font-size: 0.9rem; gap: 0.5rem; }
+    }
+    .download-btn.docx {
+      background: var(--secondary);
+      color: white;
+    }
+    .download-btn.docx:hover { filter: brightness(1.2); transform: scale(1.05); }
+    .download-btn.print {
+      background: #2d2d2d;
+      color: white;
+    }
+    .download-btn.print:hover { background: #444; transform: scale(1.05); }
+
+    .skill-pill {
+      display: inline-block;
+      background: var(--primary-light);
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+      margin: 0.15rem 0.15rem 0 0;
+      border: 1px solid var(--border-color);
+      font-size: 0.6rem;
+      transition: background 0.5s ease, border-color 0.5s ease;
+    }
+    @media (min-width: 768px) {
+      .skill-pill { padding: 0.3rem 1rem; font-size: 0.85rem; margin: 0.3rem 0.3rem 0 0; }
+    }
+
+    /* ==================== RECOMMENDATIONS ==================== */
+    .rec-meta {
+      margin-top: 0.5rem;
+      font-size: 0.55rem;
+      border-top: 1px solid var(--border-color);
+      padding-top: 0.4rem;
+    }
+    @media (min-width: 768px) {
+      .rec-meta { margin-top: 0.8rem; font-size: 0.75rem; padding-top: 0.6rem; }
+    }
+
+    /* ==================== CONTACT FORM ==================== */
+    .contact-input {
+      width: 100%;
+      background: #1a1a24;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0.5rem;
+      margin-bottom: 0.6rem;
+      color: var(--text-primary);
+      transition: border-color 0.5s ease;
+      font-size: 0.7rem;
+    }
+    @media (min-width: 768px) {
+      .contact-input { padding: 0.8rem; margin-bottom: 1rem; font-size: 1rem; border-radius: 16px; }
+    }
+    .contact-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
+    .contact-textarea {
+      min-height: 50px;
+      resize: vertical;
+    }
+    @media (min-width: 768px) {
+      .contact-textarea { min-height: 80px; }
+    }
+    .job-label {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+      margin-top: 0.4rem;
+    }
+    select.contact-input {
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e50914' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 0.6rem center;
+      background-size: 1rem;
+      cursor: pointer;
+    }
+    select.contact-input option {
+      background: #1a1a24;
+      color: var(--text-primary);
+    }
+
+    .chat-messages {
+      height: 80px;
+      overflow-y: auto;
+      margin: 0.6rem 0;
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+      padding: 0.4rem;
+      font-size: 0.7rem;
+    }
+    @media (min-width: 768px) {
+      .chat-messages { height: 150px; margin: 1rem 0; border-radius: 12px; padding: 0.5rem; font-size: 1rem; }
+    }
+    .chat-messages::-webkit-scrollbar {
+      width: 4px;
+    }
+    .chat-messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+
+    .chat-input {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .chat-input input {
+      flex: 1;
+      background: #1a1a24;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0.4rem;
+      color: var(--text-primary);
+      transition: border-color 0.5s ease;
+      font-size: 0.7rem;
+    }
+    @media (min-width: 768px) {
+      .chat-input input { padding: 0.6rem; font-size: 1rem; border-radius: 16px; }
+    }
+    .chat-input input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .chat-input button {
+      padding: 0.3rem 0.6rem;
+    }
+    @media (min-width: 768px) {
+      .chat-input button { padding: 0.5rem 1rem; }
+    }
+
+    /* ==================== BLOG MODAL ==================== */
+    .blog-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(5, 5, 10, 0.96);
+      backdrop-filter: blur(20px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+    @media (min-width: 768px) {
+      .blog-modal { padding: 2rem; }
+    }
+    .blog-modal-content {
+      max-width: 800px;
+      width: 100%;
+      background: rgba(20, 20, 35, 0.9);
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+      position: relative;
+      animation: modalFadeIn 0.4s ease;
+      transition: border-color 0.5s ease;
+    }
+    @media (min-width: 768px) {
+      .blog-modal-content { border-radius: 32px; padding: 2.5rem; }
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .blog-modal-close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--primary);
+      transition: color 0.5s ease;
+    }
+    @media (min-width: 768px) {
+      .blog-modal-close { top: 20px; right: 25px; font-size: 2rem; }
+    }
+    .blog-modal-close:hover { transform: scale(1.1); }
+    .blog-modal-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 0.6rem;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid));
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      transition: background 0.5s ease;
+    }
+    @media (min-width: 768px) {
+      .blog-modal-title { font-size: 2.2rem; margin-bottom: 1rem; }
+    }
+    .blog-modal-date {
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      margin-bottom: 0.8rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+      transition: border-color 0.5s ease;
+    }
+    @media (min-width: 768px) {
+      .blog-modal-date { font-size: 0.8rem; margin-bottom: 1.5rem; padding-bottom: 0.8rem; }
+    }
+    .blog-modal-body {
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+    @media (min-width: 768px) {
+      .blog-modal-body { font-size: 1.05rem; line-height: 1.7; }
+    }
+    .blog-modal-body p { margin-bottom: 0.6rem; }
+    @media (min-width: 768px) {
+      .blog-modal-body p { margin-bottom: 1.2rem; }
+    }
+    .blog-modal-tags {
+      margin-top: 0.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+    @media (min-width: 768px) {
+      .blog-modal-tags { margin-top: 1.5rem; gap: 0.5rem; }
+    }
+    .blog-tag {
+      background: var(--primary-light);
+      padding: 0.15rem 0.5rem;
+      border-radius: 20px;
+      font-size: 0.55rem;
+      border: 1px solid var(--border-color);
+      transition: background 0.5s ease, border-color 0.5s ease;
+    }
+    @media (min-width: 768px) {
+      .blog-tag { padding: 0.2rem 0.8rem; font-size: 0.7rem; }
+    }
+
+    /* ==================== THEME DRAWER ==================== */
+    .theme-drawer {
+      position: fixed;
+      bottom: -100%;
+      left: 0;
+      right: 0;
+      z-index: 600;
+      background: rgba(10, 10, 20, 0.95);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border-top: 1px solid var(--border-color);
+      border-radius: 24px 24px 0 0;
+      padding: 16px 16px calc(16px + var(--safe-bottom));
+      transition: bottom 0.4s cubic-bezier(0.2, 0.9, 0.4, 1);
+      max-height: 75vh;
+      overflow-y: auto;
+    }
+    .theme-drawer.open {
+      bottom: 0;
+    }
+
+    .theme-drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .theme-drawer-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .theme-drawer-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 0 6px;
+      transition: 0.2s;
+    }
+    .theme-drawer-close:hover {
+      color: var(--primary);
+      transform: rotate(90deg);
+    }
+
+    .theme-drawer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    @media (min-width: 480px) {
+      .theme-drawer-grid { grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 10px; }
+    }
+
+    .theme-drawer-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      background: none;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      padding: 6px 3px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: rgba(255,255,255,0.05);
+    }
+    .theme-drawer-btn:hover {
+      background: rgba(255,255,255,0.1);
+      transform: scale(1.05);
+    }
+    .theme-drawer-btn.active {
+      border-color: var(--text-primary);
+      background: rgba(255,255,255,0.1);
+    }
+    .theme-drawer-btn .color-preview {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.1);
+    }
+    .theme-drawer-btn .theme-name {
+      font-size: 0.5rem;
+      color: var(--text-muted);
+      text-align: center;
+      font-weight: 500;
+    }
+    @media (min-width: 480px) {
+      .theme-drawer-btn .color-preview { width: 36px; height: 36px; }
+      .theme-drawer-btn .theme-name { font-size: 0.6rem; }
+    }
+
+    .custom-color-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+    .custom-color-section label {
+      color: var(--text-secondary);
+      font-size: 0.7rem;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    .custom-color-section input[type="color"] {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 2px solid var(--border-color);
+      padding: 2px;
+      cursor: pointer;
+      background: transparent;
+      flex-shrink: 0;
+      transition: border-color 0.5s ease;
+    }
+    .custom-color-section input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+    .custom-color-section input[type="color"]::-webkit-color-swatch {
+      border: none;
+      border-radius: 50%;
+    }
+    .custom-color-section input[type="color"]::-moz-color-swatch {
+      border: none;
+      border-radius: 50%;
+    }
+    .custom-color-section .color-hex {
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      font-family: monospace;
+      flex: 1;
+    }
+    @media (min-width: 768px) {
+      .custom-color-section input[type="color"] { width: 40px; height: 40px; }
+      .custom-color-section .color-hex { font-size: 0.8rem; }
+    }
+
+    /* ==================== ADMIN & FOOTER ==================== */
+    .admin-link {
+      position: fixed;
+      bottom: 60px;
+      right: 10px;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 0.5rem;
+      cursor: pointer;
+      z-index: 400;
+      color: var(--text-muted);
+    }
+    @media (min-width: 768px) {
+      .admin-link { bottom: 70px; right: 20px; font-size: 0.7rem; padding: 5px 12px; }
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.55rem;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+    @media (min-width: 768px) {
+      footer { padding: 2rem; font-size: 0.8rem; }
+    }
+
+    /* ==================== SCROLLBAR ==================== */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 3px;
+    }
+
+    /* ==================== PRINT ==================== */
+    @media print {
+      .navbar, .floating-graph, .skill-wheel, .bg-glow, .bg-glow-2, .bg-glow-3, 
+      #orb-canvas, .admin-link, .resume-actions, .btn-primary, .btn-secondary, 
+      .mobile-toggle, .blog-card, .company-card, .award-card, .rec-card, .cert-card, 
+      .dashboard-grid, #blog, #companies, #awards, #certifications, #recommendations, 
+      #contact, .theme-drawer, .particle-container, .nav-theme-btn, .nav-theme-btn-mobile,
+      .profile-upload-overlay, .profile-status {
+        display: none !important;
+      }
+      body { background: white !important; color: black !important; padding-bottom: 0 !important; }
+      .resume-section {
+        background: white !important;
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        padding: 1rem !important;
+      }
+      .resume-section h1 { color: #e50914 !important; }
+      .resume-item h3 { color: #e50914 !important; border-bottom-color: #e50914 !important; }
+      .resume-item p, .resume-item li { color: #333 !important; }
+      .resume-item .company { color: #000 !important; }
+      .resume-item .company span { color: #666 !important; }
+      .resume-item ul li::before { color: #e50914 !important; }
+      .container { padding: 0 !important; }
+      section { padding: 0.5rem 0 !important; border-bottom: none !important; }
+      .section-title { color: #333 !important; font-size: 1.5rem !important; }
+      .glass-card { background: white !important; border-color: #ddd !important; }
+      .profile-pic-container {
+        border-color: #e50914 !important;
+        box-shadow: none !important;
+      }
+      .hero-title { color: #333 !important; background: none !important; -webkit-background-clip: unset !important; background-clip: unset !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ==================== ANIMATED BACKGROUND ==================== -->
+<canvas id="orb-canvas"></canvas>
+<div class="particle-container" id="particleContainer"></div>
+<div class="bg-glow"></div>
+<div class="bg-glow-2"></div>
+<div class="bg-glow-3"></div>
+<div class="skill-wheel"></div>
+<div class="floating-graph">
+  <div class="bar-animation">
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+  </div>
+  <div style="position:absolute; top:5px; left:10px; font-size:6px; color:var(--text-muted);">📊 DEMAND</div>
+</div>
+
+<!-- ==================== NAVBAR ==================== -->
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo" id="logo">
+      HireWithSuraj <span class="ai-badge">AI</span>
+    </div>
+    <button class="mobile-toggle" id="mobileToggle"><i class="ti ti-menu-2"></i></button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#home" class="nav-link">Home</a></li>
+      <li><a href="#companies" class="nav-link">Clients</a></li>
+      <li><a href="#awards" class="nav-link">Awards</a></li>
+      <li><a href="#blog" class="nav-link">Blog</a></li>
+      <li><a href="#certifications" class="nav-link">Certifications</a></li>
+      <li><a href="#resume" class="nav-link">Resume</a></li>
+      <li><a href="#recommendations" class="nav-link">Testimonials</a></li>
+      <li><a href="#postjob" class="nav-link">Post a Job</a></li>
+      <li><a href="#contact" class="nav-link">Hire</a></li>
+      <li>
+        <button class="nav-theme-btn" id="navThemeBtn" title="Change Theme">
+          <span class="color-dot" id="navColorDot"></span>
+          <span class="tooltip">Theme</span>
+        </button>
+      </li>
+    </ul>
+    <div class="nav-links-mobile" id="navLinksMobile">
+      <a href="#home" class="nav-link">Home</a>
+      <a href="#companies" class="nav-link">Clients</a>
+      <a href="#awards" class="nav-link">Awards</a>
+      <a href="#blog" class="nav-link">Blog</a>
+      <a href="#certifications" class="nav-link">Certifications</a>
+      <a href="#resume" class="nav-link">Resume</a>
+      <a href="#recommendations" class="nav-link">Testimonials</a>
+      <a href="#postjob" class="nav-link">Post a Job</a>
+      <a href="#contact" class="nav-link">Hire</a>
+      <button class="nav-theme-btn-mobile" id="navThemeBtnMobile" title="Change Theme">
+        <span class="color-dot" id="navColorDotMobile"></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ==================== MAIN CONTENT ==================== -->
+<div class="container">
+
+  <!-- HOME - Fully Centered -->
+  <section id="home">
+    <div class="hero-content reveal-hidden">
+      <!-- Badge -->
+      <div class="hero-badge">
+        ✦ <span>SURAJ SINGH</span> ✦
+      </div>
+      
+      <!-- Profile Picture - Centered -->
+      <div class="profile-wrapper">
+        <div class="profile-pic-container" id="profileContainer">
+          <img src="https://i.ibb.co/zWGF8m5s/Professional-Picture-1.png" alt="Suraj Singh" id="profileImage">
+          <div class="profile-status"></div>
+          <div class="profile-upload-overlay" id="profileUploadOverlay">
+            <span><i class="ti ti-camera"></i> Change Photo</span>
+            <input type="file" id="profileUpload" accept="image/*">
+          </div>
+        </div>
+      </div>
+      
+      <!-- Premium Badge -->
+      <div class="badge-premium">⚡ HIREWITH SURAJ AI ⚡</div>
+      
+      <!-- Hero Title -->
+      <h1 class="hero-title">
+        HireWithSuraj <span class="ai-glow">AI</span>
+        <span>by Suraj Singh</span>
+      </h1>
+      
+      <!-- Subtitle -->
+      <div class="hero-sub">“Recruiting the Architects of the AI Future.”</div>
+      
+      <!-- Buttons -->
+      <div class="hero-buttons">
+        <a href="#companies" class="btn-primary">Explore Clients</a>
+        <a href="#resume" class="btn-secondary">View Resume →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section>
+    <div class="dashboard-grid">
+      <div class="metric-glow reveal-hidden">
+        <div class="metric-number">500+</div>
+        <div class="metric-label">Tech Roles Closed</div>
+      </div>
+      <div class="metric-glow reveal-hidden">
+        <div class="metric-number">94%</div>
+        <div class="metric-label">Offer Acceptance</div>
+      </div>
+      <div class="metric-glow reveal-hidden">
+        <div class="metric-number">12d</div>
+        <div class="metric-label">Avg Time-to-Hire</div>
+      </div>
+      <div class="metric-glow reveal-hidden">
+        <div class="metric-number">20+</div>
+        <div class="metric-label">Enterprise Clients</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPANIES -->
+  <section id="companies">
+    <div class="section-title reveal-hidden"><i class="ti ti-building"></i> 🌍 ENTERPRISE CLIENTS</div>
+    <div class="grid-overlap">
+      <div class="company-card reveal-hidden"><i class="ti ti-building-store" style="color:var(--primary);"></i><h3 style="color:var(--text-primary); font-size:0.85rem;">Walmart</h3><p style="color:var(--text-secondary); font-size:0.65rem;">15+ AI/Cloud roles</p></div>
+      <div class="company-card reveal-hidden"><i class="ti ti-brand-meta" style="color:var(--primary);"></i><h3 style="color:var(--text-primary); font-size:0.85rem;">Meta</h3><p style="color:var(--text-secondary); font-size:0.65rem;">GenAI Engineers</p></div>
+      <div class="company-card reveal-hidden"><i class="ti ti-currency-dollar" style="color:var(--primary);"></i><h3 style="color:var(--text-primary); font-size:0.85rem;">JPMorgan Chase</h3><p style="color:var(--text-secondary); font-size:0.65rem;">MCP & Agentic AI</p></div>
+      <div class="company-card reveal-hidden"><i class="ti ti-brand-spotify" style="color:var(--primary);"></i><h3 style="color:var(--text-primary); font-size:0.85rem;">Sephora</h3><p style="color:var(--text-secondary); font-size:0.65rem;">AI Product</p></div>
+      <div class="company-card reveal-hidden"><i class="ti ti-server" style="color:var(--primary);"></i><h3 style="color:var(--text-primary); font-size:0.85rem;">HPE</h3><p style="color:var(--text-secondary); font-size:0.65rem;">Cloud Architects</p></div>
+      <div class="company-card reveal-hidden"><i class="ti ti-cloud" style="color:var(--primary);"></i><h3 style="color:var(--text-primary); font-size:0.85rem;">Equinix</h3><p style="color:var(--text-secondary); font-size:0.65rem;">Infrastructure</p></div>
+      <div class="company-card reveal-hidden"><i class="ti ti-home" style="color:var(--primary);"></i><h3 style="color:var(--text-primary); font-size:0.85rem;">Airbnb</h3><p style="color:var(--text-secondary); font-size:0.65rem;">Full Stack</p></div>
+      <div class="company-card reveal-hidden"><i class="ti ti-heart" style="color:var(--primary);"></i><h3 style="color:var(--text-primary); font-size:0.85rem;">Hims & Hers</h3><p style="color:var(--text-secondary); font-size:0.65rem;">HealthTech</p></div>
+    </div>
+    <div class="client-logo-grid">
+      <span class="client-item">Samsung</span>
+      <span class="client-item">Sony</span>
+      <span class="client-item">Albertsons</span>
+      <span class="client-item">Shipt</span>
+      <span class="client-item">GoPro</span>
+    </div>
+  </section>
+
+  <!-- AWARDS -->
+  <section id="awards">
+    <div class="section-title reveal-hidden"><i class="ti ti-trophy"></i> 🏆 AWARDS</div>
+    <div class="grid-overlap">
+      <div class="award-card reveal-hidden"><i class="ti ti-rocket" style="color:gold;"></i><h3 style="color:var(--text-primary); font-size:0.85rem;">Growth Accelerator</h3><p style="color:var(--text-secondary); font-size:0.65rem;">Q1 2026 · Feb 2026 · Sep 2025</p></div>
+      <div class="award-card reveal-hidden"><i class="ti ti-moneybag" style="color:gold;"></i><h3 style="color:var(--text-primary); font-size:0.85rem;">Money Magnet</h3><p style="color:var(--text-secondary); font-size:0.65rem;">Q1 2026 · Sep 2025</p></div>
+      <div class="award-card reveal-hidden"><i class="ti ti-search" style="color:var(--primary);"></i><h3 style="color:var(--text-primary); font-size:0.85rem;">Sourcing Sentinel</h3><p style="color:var(--text-secondary); font-size:0.65rem;">August 2025</p></div>
+      <div class="award-card reveal-hidden"><i class="ti ti-microphone" style="color:var(--primary);"></i><h3 style="color:var(--text-primary); font-size:0.85rem;">AI Innovator</h3><p style="color:var(--text-secondary); font-size:0.65rem;">TA Week 2025</p></div>
+    </div>
+  </section>
+
+  <!-- BLOG -->
+  <section id="blog">
+    <div class="section-title reveal-hidden"><i class="ti ti-article"></i> 📝 BLOG</div>
+    <div id="blogContainer" class="grid-overlap"></div>
+  </section>
+
+  <!-- CERTIFICATIONS -->
+  <section id="certifications">
+    <div class="section-title reveal-hidden"><i class="ti ti-certificate"></i> 🎓 CERTIFICATIONS</div>
+    <div class="grid-overlap">
+      <div class="cert-card reveal-hidden"><i class="ti ti-school" style="color:var(--primary);"></i><h3 style="color:var(--text-primary); font-size:0.85rem;">B.E. Information Technology</h3><p style="color:var(--text-secondary); font-size:0.65rem;">Rustamji Institute</p></div>
+      <div class="cert-card reveal-hidden"><i class="ti ti-code" style="color:var(--primary);"></i><h3 style="color:var(--text-primary); font-size:0.85rem;">MERN Stack Development</h3><p style="color:var(--text-secondary); font-size:0.65rem;">EdYoda · MongoDB, Express, React, Node</p></div>
+      <div class="cert-card reveal-hidden"><i class="ti ti-brand-openai" style="color:var(--primary);"></i><h3 style="color:var(--text-primary); font-size:0.85rem;">AI-Driven Recruiting</h3><p style="color:var(--text-secondary); font-size:0.65rem;">LinkedIn Recruiter Power User · 2025</p></div>
+      <div class="cert-card reveal-hidden"><i class="ti ti-brand-linkedin" style="color:var(--primary);"></i><h3 style="color:var(--text-primary); font-size:0.85rem;">Tech Recruitment</h3><p style="color:var(--text-secondary); font-size:0.65rem;">DevSkiller · Employer Branding</p></div>
+    </div>
+  </section>
+
+  <!-- RESUME -->
+  <section id="resume">
+    <div class="section-title reveal-hidden"><i class="ti ti-file-description"></i> 📄 RESUME</div>
+    <div class="resume-section glass-card reveal-hidden" id="resumeContent">
+      <div class="resume-actions">
+        <button class="download-btn docx" onclick="downloadResumeDOCX()"><i class="ti ti-file-word"></i> Download DOCX</button>
+        <button class="download-btn print" onclick="window.print()"><i class="ti ti-printer"></i> Print</button>
+      </div>
+
+      <h1>Suraj Singh</h1>
+      <div class="subtitle">Engineering Hiring Leader | MCP, Agentic AI & GenAI Recruiter | AI-Driven Talent Acquisition</div>
+      <div class="contact-info">
+        <span><i class="ti ti-map-pin"></i> Indore, Madhya Pradesh, India</span>
+        <span><i class="ti ti-mail"></i> suraj.singh@bayonesolutions.com</span>
+        <span><i class="ti ti-brand-linkedin"></i> linkedin.com/in/surajsingh-ai</span>
+      </div>
+
+      <div class="resume-item">
+        <h3>PROFESSIONAL SUMMARY</h3>
+        <p>Engineering Hiring Leader with 7+ years of experience in global technical recruitment, specializing in AI, Generative AI, MCP, Agentic AI, AI/ML, Cloud, Data Engineering, Product, and Enterprise Technology hiring across North America, APAC, and LATAM. Partnered with enterprise and FAANG-adjacent organizations including Sephora, Walmart, JPMorgan Chase, HPE, Albertsons, Meta, Equinix, Samsung, Airbnb, Sony, and GoPro to build high-performing engineering and product teams.</p>
+        <p style="margin-top:0.5rem;">Strong expertise in AI-driven recruiting, technical sourcing, stakeholder partnership, talent intelligence, candidate engagement, and hiring strategy. Hands-on experience using ChatGPT, Claude, prompt engineering, and custom GPT workflows to improve recruiting efficiency.</p>
+      </div>
+
+      <div class="resume-item">
+        <h3>AI & EMERGING TECHNOLOGY EXPERTISE</h3>
+        <ul>
+          <li>MCP (Model Context Protocol) & Agentic AI Talent Hiring</li>
+          <li>Generative AI (GenAI), LLM Engineering & AI Product Hiring</li>
+          <li>AI Engineers, AI Architects, Data Engineers & AI/ML Specialists</li>
+          <li>Prompt Engineering & AI-powered recruitment workflows</li>
+          <li>ChatGPT, Claude, Gemini, Custom GPT workflows</li>
+          <li>RAG, LLM, AI Platform and Enterprise AI ecosystem hiring</li>
+        </ul>
+      </div>
+
+      <div class="resume-item">
+        <h3>CORE COMPETENCIES</h3>
+        <ul>
+          <li>Full Life Cycle Recruiting (Contract, C2H, FTE)</li>
+          <li>Engineering, Product, Data, Cloud & AI Hiring</li>
+          <li>Hiring Manager & Client Relationship Management</li>
+          <li>Strategic Sourcing & Market Mapping</li>
+          <li>LinkedIn Recruiter, Dice, GitHub, Stack Overflow</li>
+          <li>ATS/VMS: JobDiva, Ceipal, Workday, Fieldglass</li>
+          <li>Interview Management, Offer Negotiation & Delivery Leadership</li>
+        </ul>
+      </div>
+
+      <div class="resume-item">
+        <h3>PROFESSIONAL EXPERIENCE</h3>
+        
+        <div class="company">BayOne Solutions | Lead Talent Partner (AI & Engineering Hiring) <span>June 2022 - Present</span></div>
+        <ul>
+          <li>Lead end-to-end recruitment for AI, GenAI, MCP, Agentic AI, Data, Cloud, Backend, Frontend, Full Stack, DevOps, and Enterprise Architecture roles.</li>
+          <li>Partner with Engineering Managers, Product Leaders, Architects, and business stakeholders to scale technology organizations.</li>
+          <li>Specialized hiring for MCP Architects, Agentic AI Engineers, AI Product Managers, GenAI Specialists, Lead Data Engineers, and AI-focused Data Architects.</li>
+          <li>Leverage AI-driven recruiting strategies using Claude, ChatGPT, prompt engineering, and custom GPT workflows.</li>
+          <li>Support enterprise clients including Sephora, Walmart, JPMorgan Chase, HPE, Albertsons, Woven, Shipt, McGrath RentCorp, and Hims & Hers Health.</li>
+        </ul>
+
+        <div class="company" style="margin-top:0.6rem;">AMISEQ | Senior Technical Recruiter <span>July 2021 - June 2022</span></div>
+        <ul>
+          <li>Managed complete recruitment lifecycle including sourcing, screening, interview coordination, offer management, and onboarding.</li>
+          <li>Supported major client engagements including Walmart, Meta, and Equinix.</li>
+          <li>Built pipelines across Backend, Frontend, Full Stack, Cloud, DevOps, Data Engineering, Infrastructure, and Product roles.</li>
+        </ul>
+
+        <div class="company" style="margin-top:0.6rem;">Global Information Technology | Talent Acquisition Lead <span>August 2020 - July 2021</span></div>
+        <ul>
+          <li>Led recruitment strategy for Analytics, Cloud, Data Platforms, and emerging technology roles.</li>
+          <li>Managed recruiting teams and improved sourcing efficiency through market intelligence and process optimization.</li>
+        </ul>
+
+        <div class="company" style="margin-top:0.6rem;">Vertisystem | Senior IT Recruiter <span>2018 - 2019</span></div>
+        <ul>
+          <li>Managed full-cycle IT recruitment across software development lifecycle and infrastructure domains.</li>
+          <li>Handled sourcing, candidate engagement, negotiations, and client delivery.</li>
+        </ul>
+      </div>
+
+      <div class="resume-item">
+        <h3>RECOGNITION & AWARDS</h3>
+        <ul>
+          <li>The Growth Accelerator Award — Quarter 1 2026</li>
+          <li>The Money Magnet Award — Quarter 1 2026</li>
+          <li>The Growth Accelerator Award — February 2026</li>
+          <li>The Sourcing Sentinel Award — August 2025</li>
+          <li>The Money Magnet Award — September 2025</li>
+          <li>Growth Accelerator Award — September 2025</li>
+        </ul>
+      </div>
+
+      <div class="resume-item">
+        <h3>CERTIFICATIONS</h3>
+        <ul>
+          <li>AI-Driven Recruiting - LinkedIn Recruiter Power User Assessment (Issued July 2025)</li>
+          <li>Employer Branding Certification - hirist</li>
+          <li>MERN Stack & Advanced JavaScript Certifications</li>
+        </ul>
+      </div>
+
+      <div class="resume-item">
+        <h3>TECHNICAL BACKGROUND</h3>
+        <p>MERN Stack Development: MongoDB, Express.js, React.js, Node.js, JavaScript, HTML, CSS, GitHub</p>
+      </div>
+
+      <div class="resume-item">
+        <h3>EDUCATION</h3>
+        <p>Bachelor of Engineering (B.E.) - Information Technology<br>Rustamji Institute of Technology</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECOMMENDATIONS -->
+  <section id="recommendations">
+    <div class="section-title reveal-hidden"><i class="ti ti-message"></i> 💬 TESTIMONIALS</div>
+    <div style="display:flex; flex-direction:column; gap:0.8rem;">
+      <div class="rec-card glass-card reveal-hidden"><i class="ti ti-quote" style="color:var(--primary);"></i><p style="color:var(--text-secondary); font-size:0.8rem;">“I had the pleasure of working with Suraj Singh during my job search... He advocated for me in ways I didn't expect. I wholeheartedly recommend Suraj Singh.”</p><div class="rec-meta"><strong style="color:var(--text-primary);">Nayantara Yadav</strong> <span style="color:var(--text-muted);">· Sr. Project Manager · June 15, 2026</span></div></div>
+      <div class="rec-card glass-card reveal-hidden"><i class="ti ti-quote" style="color:var(--primary);"></i><p style="color:var(--text-secondary); font-size:0.8rem;">“I'm really grateful to Suraj Singh for connecting me with my latest contract opportunity. He was quick to act, clear in his communication.”</p><div class="rec-meta"><strong style="color:var(--text-primary);">Alvaro Naddeo</strong> <span style="color:var(--text-muted);">· Sr. Art Director · June 10, 2026</span></div></div>
+      <div class="rec-card glass-card reveal-hidden"><i class="ti ti-quote" style="color:var(--primary);"></i><p style="color:var(--text-secondary); font-size:0.8rem;">“Suraj's proactive follow-ups and constant support made the entire journey smooth and stress-free. He remained involved until I received my offer.”</p><div class="rec-meta"><strong style="color:var(--text-primary);">Akshata Agarwal</strong> <span style="color:var(--text-muted);">· AI Product Analytics · Feb 7, 2026</span></div></div>
+      <div class="rec-card glass-card reveal-hidden"><i class="ti ti-quote" style="color:var(--primary);"></i><p style="color:var(--text-secondary); font-size:0.8rem;">“Suraj is an exceptional recruiter who truly prioritizes the candidate experience. A true partner to both the hiring team and the candidate.”</p><div class="rec-meta"><strong style="color:var(--text-primary);">Navya Nayaki Yelloji</strong> <span style="color:var(--text-muted);">· Sr. Product Manager · Jan 20, 2026</span></div></div>
+    </div>
+  </section>
+
+  <!-- POST A JOB -->
+  <section id="postjob">
+    <div class="section-title reveal-hidden"><i class="ti ti-briefcase"></i> 📋 POST A JOB REQUIREMENT</div>
+    <div class="glass-card reveal-hidden" style="padding:1.2rem;">
+      <p style="color:var(--text-secondary); font-size:0.8rem; margin-bottom:1rem;">Hiring for AI, GenAI, MCP, Agentic AI, Cloud, or Engineering roles? Fill this out and it'll open in your email app, ready to send straight to my inbox — no sign-up needed.</p>
+
+      <label class="job-label">Company Name *</label>
+      <input type="text" id="jobCompany" placeholder="e.g. Acme Corp" class="contact-input">
+
+      <label class="job-label">Job Title / Role *</label>
+      <input type="text" id="jobTitle" placeholder="e.g. Senior MCP Architect" class="contact-input">
+
+      <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
+        <div style="flex:1; min-width:140px;">
+          <label class="job-label">Employment Type</label>
+          <select id="jobType" class="contact-input">
+            <option value="Full-Time (FTE)">Full-Time (FTE)</option>
+            <option value="Contract">Contract</option>
+            <option value="Contract-to-Hire (C2H)">Contract-to-Hire (C2H)</option>
+            <option value="Part-Time">Part-Time</option>
+          </select>
+        </div>
+        <div style="flex:1; min-width:140px;">
+          <label class="job-label">Location / Remote</label>
+          <input type="text" id="jobLocation" placeholder="e.g. Remote / Austin, TX" class="contact-input">
+        </div>
+      </div>
+
+      <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
+        <div style="flex:1; min-width:140px;">
+          <label class="job-label">Experience Level</label>
+          <input type="text" id="jobExperience" placeholder="e.g. 5+ years" class="contact-input">
+        </div>
+        <div style="flex:1; min-width:140px;">
+          <label class="job-label">Budget / Rate Range</label>
+          <input type="text" id="jobBudget" placeholder="e.g. $150k-$180k or $80-$95/hr" class="contact-input">
+        </div>
+      </div>
+
+      <label class="job-label">Key Skills (comma separated)</label>
+      <input type="text" id="jobSkills" placeholder="e.g. MCP, LangChain, Python, AWS" class="contact-input">
+
+      <label class="job-label">Job Description / Requirements *</label>
+      <textarea id="jobDescription" placeholder="Describe the role, responsibilities, and must-have qualifications..." class="contact-input contact-textarea" style="min-height:110px;"></textarea>
+
+      <label class="job-label">Your Name *</label>
+      <input type="text" id="jobContactName" placeholder="Your full name" class="contact-input">
+
+      <label class="job-label">Your Email *</label>
+      <input type="email" id="jobContactEmail" placeholder="you@company.com" class="contact-input">
+
+      <label class="job-label">Your Phone (optional)</label>
+      <input type="text" id="jobContactPhone" placeholder="+1 555 123 4567" class="contact-input">
+
+      <button id="submitJob" class="btn-primary" style="width:100%; margin-top:0.6rem;"><i class="ti ti-mail"></i> Send Job Requirement</button>
+      <div id="jobMsg" style="margin-top:0.6rem; color:var(--text-secondary); font-size:0.7rem;"></div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="section-title reveal-hidden"><i class="ti ti-device-desktop"></i> 🎯 HIRE ELITE TALENT</div>
+    <div style="display: flex; flex-direction: column; gap: 1.2rem;">
+      <div class="glass-card reveal-hidden" style="padding:1rem;">
+        <h3 style="color:var(--text-primary); font-size:0.9rem; margin-bottom:0.6rem;">Send hiring request</h3>
+        <input type="text" id="clientName" placeholder="Your name / company" class="contact-input">
+        <input type="email" id="clientEmail" placeholder="Email" class="contact-input">
+        <textarea id="clientMessage" placeholder="Tell me about your hiring needs..." class="contact-input contact-textarea"></textarea>
+        <button id="sendInquiry" class="btn-primary" style="width:100%;">Send Inquiry</button>
+        <div id="inquiryMsg" style="margin-top:0.6rem; color:var(--text-secondary); font-size:0.7rem;"></div>
+      </div>
+      <div class="glass-card reveal-hidden" style="padding:1rem;">
+        <div style="color:var(--text-primary); margin-bottom:0.4rem;"><i class="ti ti-message-circle"></i> <strong>AI Talent Assistant</strong></div>
+        <div class="chat-messages" id="chatMessages">
+          <div style="color:var(--text-muted);">🤖: Ask about MCP, Agentic AI, or sourcing strategies.</div>
+        </div>
+        <div class="chat-input">
+          <input type="text" id="chatInput" placeholder="Ask me...">
+          <button id="sendChat" class="btn-primary" style="padding:0.3rem 0.6rem;">Send</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ==================== THEME DRAWER ==================== -->
+<div class="theme-drawer" id="themeDrawer">
+  <div class="theme-drawer-header">
+    <span class="theme-drawer-title">🎨 Theme Customizer</span>
+    <button class="theme-drawer-close" id="themeDrawerClose">✕</button>
+  </div>
+
+  <div class="theme-drawer-grid" id="themeDrawerGrid">
+    <!-- Theme buttons will be rendered by JS -->
+  </div>
+
+  <div class="custom-color-section">
+    <label>Custom Color</label>
+    <input type="color" id="customColorPicker" value="#e50914">
+    <span class="color-hex" id="colorHexDisplay">#e50914</span>
+  </div>
+</div>
+
+<!-- ==================== ADMIN & FOOTER ==================== -->
+<div class="admin-link" id="adminLink">🔐 Admin</div>
+<footer>© 2026 HireWithSuraj AI — AI Recruiting | Resume | Blog</footer>
+
+<!-- ==================== BLOG MODAL ==================== -->
+<div id="blogModal" class="blog-modal">
+  <div class="blog-modal-content">
+    <span class="blog-modal-close" id="closeModalBtn">&times;</span>
+    <div id="modalTitle" class="blog-modal-title"></div>
+    <div id="modalDate" class="blog-modal-date"></div>
+    <div id="modalBody" class="blog-modal-body"></div>
+    <div id="modalTags" class="blog-modal-tags"></div>
+  </div>
+</div>
+
+<script>
+// ========================================================================
+// 1. ANIMATED BACKGROUND - ORB CANVAS
+// ========================================================================
+const canvas = document.getElementById('orb-canvas');
+const ctx = canvas.getContext('2d');
+let orbs = [];
+let mouseX = 0, mouseY = 0;
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+document.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+});
+
+class Orb {
+  constructor() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.radius = Math.random() * 50 + 15;
+    this.dx = (Math.random() - 0.5) * 0.3;
+    this.dy = (Math.random() - 0.5) * 0.2;
+    this.pulseSpeed = Math.random() * 0.02 + 0.01;
+  }
+  update() {
+    this.x += this.dx;
+    this.y += this.dy;
+    const dx = this.x - mouseX;
+    const dy = this.y - mouseY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 200) {
+      const force = (200 - dist) / 200 * 0.4;
+      this.x += dx / dist * force;
+      this.y += dy / dist * force;
+    }
+    this.radius += Math.sin(Date.now() * this.pulseSpeed) * 0.15;
+    this.radius = Math.max(this.radius, 12);
+    if (this.x < -150) this.x = canvas.width + 100;
+    if (this.x > canvas.width + 150) this.x = -100;
+    if (this.y < -150) this.y = canvas.height + 100;
+    if (this.y > canvas.height + 150) this.y = -100;
+  }
+  draw() {
+    const primary = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+    const grad = ctx.createRadialGradient(
+      this.x - this.radius * 0.3, this.y - this.radius * 0.3, 0,
+      this.x, this.y, this.radius
+    );
+    grad.addColorStop(0, primary + '30');
+    grad.addColorStop(1, primary + '08');
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius * 0.7, 0, Math.PI * 2);
+    ctx.strokeStyle = primary + '15';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+}
+
+for (let i = 0; i < 20; i++) orbs.push(new Orb());
+
+function animateOrbs() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  orbs.forEach(o => { o.update(); o.draw(); });
+  requestAnimationFrame(animateOrbs);
+}
+animateOrbs();
+
+// ========================================================================
+// 2. PARTICLES
+// ========================================================================
+function createParticles() {
+  const container = document.getElementById('particleContainer');
+  const colors = ['var(--primary)', 'var(--secondary)', 'var(--primary-dark)'];
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 5 + 2;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (Math.random() * 18 + 12) + 's';
+    p.style.animationDelay = (Math.random() * 8) + 's';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    container.appendChild(p);
+  }
+}
+createParticles();
+
+// ========================================================================
+// 3. ADMIN SYSTEM & PROFILE PICTURE
+// ========================================================================
+let isAdmin = false;
+const ADMIN_PASSWORD = 'SurajAdmin2026';
+
+const profileUpload = document.getElementById('profileUpload');
+const profileImage = document.getElementById('profileImage');
+const profileUploadOverlay = document.getElementById('profileUploadOverlay');
+
+// Admin functions
+function enableAdmin() {
+  isAdmin = true;
+  // Show profile upload overlay for admin
+  profileUploadOverlay.classList.add('admin-mode');
+  document.getElementById('adminLink').textContent = '🚪 Logout';
+  document.getElementById('adminLink').onclick = logoutAdmin;
+  // Re-render blogs with admin controls
+  renderBlogs();
+}
+
+function logoutAdmin() {
+  isAdmin = false;
+  profileUploadOverlay.classList.remove('admin-mode');
+  document.getElementById('adminLink').textContent = '🔐 Admin';
+  document.getElementById('adminLink').onclick = adminClick;
+  renderBlogs();
+}
+
+function adminClick() {
+  if (isAdmin) {
+    logoutAdmin();
+  } else {
+    const pwd = prompt('Enter admin password:');
+    if (pwd === ADMIN_PASSWORD) {
+      enableAdmin();
+    } else if (pwd !== null) {
+      alert('Wrong password!');
+    }
+  }
+}
+document.getElementById('adminLink').onclick = adminClick;
+
+// Profile upload - only works in admin mode
+profileUpload.addEventListener('change', function(e) {
+  if (!isAdmin) {
+    alert('Only admin can change the profile picture.');
+    this.value = '';
+    return;
+  }
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      profileImage.src = event.target.result;
+      localStorage.setItem('profileImage', event.target.result);
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+// Load saved profile image
+const savedImage = localStorage.getItem('profileImage');
+if (savedImage) {
+  profileImage.src = savedImage;
+}
+
+// ========================================================================
+// 4. THEME SYSTEM
+// ========================================================================
+const themePresets = [
+  { id: 'default', name: 'Red', color: '#e50914' },
+  { id: 'purple', name: 'Purple', color: '#7c3aed' },
+  { id: 'cyan', name: 'Cyan', color: '#06b6d4' },
+  { id: 'gold', name: 'Gold', color: '#f59e0b' },
+  { id: 'green', name: 'Green', color: '#10b981' },
+  { id: 'pink', name: 'Pink', color: '#ec4899' },
+  { id: 'orange', name: 'Orange', color: '#f97316' }
+];
+
+const themeColors = {
+  default: { primary: '#e50914', primaryDark: '#ff2a2a', secondary: '#0a66ff' },
+  purple: { primary: '#7c3aed', primaryDark: '#8b5cf6', secondary: '#a78bfa' },
+  cyan: { primary: '#06b6d4', primaryDark: '#22d3ee', secondary: '#67e8f9' },
+  gold: { primary: '#f59e0b', primaryDark: '#fbbf24', secondary: '#fcd34d' },
+  green: { primary: '#10b981', primaryDark: '#34d399', secondary: '#6ee7b7' },
+  pink: { primary: '#ec4899', primaryDark: '#f472b6', secondary: '#f9a8d4' },
+  orange: { primary: '#f97316', primaryDark: '#fb923c', secondary: '#fdba74' }
+};
+
+function applyTheme(themeId, customColor = null) {
+  let colors;
+  if (customColor) {
+    colors = {
+      primary: customColor,
+      primaryDark: customColor,
+      secondary: customColor,
+      primaryLight: customColor + '25',
+      primaryGlow: customColor + '40',
+      borderColor: customColor + '50',
+      gradientMid: customColor,
+      shadowColor: customColor + '80'
+    };
+    localStorage.setItem('talentverse-custom-color', customColor);
+    localStorage.setItem('talentverse-theme', 'custom');
+  } else {
+    colors = themeColors[themeId];
+    if (!colors) return;
+    localStorage.removeItem('talentverse-custom-color');
+    localStorage.setItem('talentverse-theme', themeId);
+  }
+
+  const root = document.documentElement;
+  document.body.className = document.body.className.split(' ').filter(c => !c.startsWith('theme-')).join(' ');
+  if (themeId !== 'custom' && themeId !== 'default') {
+    document.body.classList.add('theme-' + themeId);
+  }
+
+  root.style.setProperty('--primary', colors.primary);
+  root.style.setProperty('--primary-dark', colors.primaryDark);
+  root.style.setProperty('--secondary', colors.secondary);
+  root.style.setProperty('--primary-light', colors.primaryLight || colors.primary + '25');
+  root.style.setProperty('--primary-glow', colors.primaryGlow || colors.primary + '40');
+  root.style.setProperty('--border-color', colors.borderColor || colors.primary + '50');
+  root.style.setProperty('--gradient-mid', colors.gradientMid || colors.primary);
+  root.style.setProperty('--shadow-color', colors.shadowColor || colors.primary + '80');
+
+  document.querySelectorAll('.theme-drawer-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.theme === themeId);
+  });
+
+  document.querySelectorAll('.color-dot').forEach(dot => {
+    dot.style.background = colors.primary;
+  });
+
+  const picker = document.getElementById('customColorPicker');
+  if (customColor) {
+    picker.value = customColor;
+    document.getElementById('colorHexDisplay').textContent = customColor;
+  } else {
+    picker.value = colors.primary;
+    document.getElementById('colorHexDisplay').textContent = colors.primary;
+  }
+
+  orbs.forEach(orb => {
+    orb.color = colors.primary + '20';
+  });
+
+  document.querySelectorAll('.particle').forEach((p, i) => {
+    const colorsArr = [colors.primary, colors.secondary, colors.primaryDark];
+    p.style.background = colorsArr[i % colorsArr.length];
+  });
+}
+
+// ========================================================================
+// 5. THEME DRAWER
+// ========================================================================
+function renderThemeDrawer() {
+  const grid = document.getElementById('themeDrawerGrid');
+  grid.innerHTML = '';
+  themePresets.forEach(theme => {
+    const btn = document.createElement('button');
+    btn.className = 'theme-drawer-btn';
+    btn.dataset.theme = theme.id;
+    btn.innerHTML = `
+      <div class="color-preview" style="background:${theme.color};"></div>
+      <span class="theme-name">${theme.name}</span>
+    `;
+    btn.addEventListener('click', () => {
+      applyTheme(theme.id);
+      closeThemeDrawer();
+    });
+    grid.appendChild(btn);
+  });
+}
+renderThemeDrawer();
+
+const navThemeBtn = document.getElementById('navThemeBtn');
+const navThemeBtnMobile = document.getElementById('navThemeBtnMobile');
+const themeDrawer = document.getElementById('themeDrawer');
+const themeDrawerClose = document.getElementById('themeDrawerClose');
+
+function openThemeDrawer() { themeDrawer.classList.add('open'); }
+function closeThemeDrawer() { themeDrawer.classList.remove('open'); }
+
+navThemeBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  themeDrawer.classList.toggle('open');
+});
+navThemeBtnMobile.addEventListener('click', (e) => {
+  e.stopPropagation();
+  themeDrawer.classList.toggle('open');
+});
+themeDrawerClose.addEventListener('click', closeThemeDrawer);
+
+document.addEventListener('click', (e) => {
+  if (themeDrawer.classList.contains('open')) {
+    if (!themeDrawer.contains(e.target) && 
+        e.target !== navThemeBtn && 
+        e.target !== navThemeBtnMobile &&
+        !navThemeBtn.contains(e.target) &&
+        !navThemeBtnMobile.contains(e.target)) {
+      closeThemeDrawer();
+    }
+  }
+});
+
+document.getElementById('customColorPicker').addEventListener('input', function() {
+  const color = this.value;
+  document.getElementById('colorHexDisplay').textContent = color;
+  applyTheme('custom', color);
+});
+
+// ========================================================================
+// 6. LOAD SAVED THEME
+// ========================================================================
+const savedTheme = localStorage.getItem('talentverse-theme');
+const customColor = localStorage.getItem('talentverse-custom-color');
+if (customColor && savedTheme === 'custom') {
+  applyTheme('custom', customColor);
+} else if (savedTheme && savedTheme !== 'custom') {
+  applyTheme(savedTheme);
+} else {
+  applyTheme('default');
+}
+
+// ========================================================================
+// 7. REVEAL ON SCROLL
+// ========================================================================
+const hiddenElements = document.querySelectorAll('.reveal-hidden');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('reveal-visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+hiddenElements.forEach(el => observer.observe(el));
+
+// ========================================================================
+// 8. MOBILE NAV
+// ========================================================================
+const mobileToggle = document.getElementById('mobileToggle');
+const navLinksMobile = document.getElementById('navLinksMobile');
+mobileToggle.addEventListener('click', () => {
+  navLinksMobile.classList.toggle('open');
+});
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', () => {
+    navLinksMobile.classList.remove('open');
+  });
+});
+
+// ========================================================================
+// 9. CONTACT & CHAT
+// ========================================================================
+const RECRUITER_EMAIL = 'suraj.singh@bayonesolutions.com';
+
+document.getElementById('sendInquiry')?.addEventListener('click', () => {
+  const name = document.getElementById('clientName').value.trim();
+  const email = document.getElementById('clientEmail').value.trim();
+  const message = document.getElementById('clientMessage')?.value.trim() || '';
+  const msgEl = document.getElementById('inquiryMsg');
+
+  if (!name || !email) {
+    msgEl.innerHTML = '⚠️ Please provide your name and email.';
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    msgEl.innerHTML = '⚠️ Please enter a valid email address.';
+    return;
+  }
+
+  const subject = `Hiring Inquiry from ${name}`;
+  const body =
+`Name: ${name}
+Email: ${email}
+
+Message:
+${message || '(no additional message)'}`;
+
+  const mailtoLink = `mailto:${RECRUITER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = mailtoLink;
+
+  msgEl.innerHTML = `✅ Opening your email app to send this to ${RECRUITER_EMAIL}. If nothing opens, email me directly at ${RECRUITER_EMAIL}.`;
+  document.getElementById('clientName').value = '';
+  document.getElementById('clientEmail').value = '';
+  if (document.getElementById('clientMessage')) document.getElementById('clientMessage').value = '';
+});
+
+// ---- POST A JOB REQUIREMENT ----
+document.getElementById('submitJob')?.addEventListener('click', () => {
+  const company = document.getElementById('jobCompany').value.trim();
+  const title = document.getElementById('jobTitle').value.trim();
+  const type = document.getElementById('jobType').value;
+  const location = document.getElementById('jobLocation').value.trim();
+  const experience = document.getElementById('jobExperience').value.trim();
+  const budget = document.getElementById('jobBudget').value.trim();
+  const skills = document.getElementById('jobSkills').value.trim();
+  const description = document.getElementById('jobDescription').value.trim();
+  const contactName = document.getElementById('jobContactName').value.trim();
+  const contactEmail = document.getElementById('jobContactEmail').value.trim();
+  const contactPhone = document.getElementById('jobContactPhone').value.trim();
+  const jobMsgEl = document.getElementById('jobMsg');
+
+  if (!company || !title || !description || !contactName || !contactEmail) {
+    jobMsgEl.innerHTML = '⚠️ Please fill in Company, Job Title, Description, Your Name, and Your Email.';
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) {
+    jobMsgEl.innerHTML = '⚠️ Please enter a valid email address.';
+    return;
+  }
+
+  const subject = `New Job Requirement: ${title} @ ${company}`;
+  const body =
+`A new job requirement was submitted via HireWithSuraj AI.
+
+COMPANY: ${company}
+JOB TITLE: ${title}
+EMPLOYMENT TYPE: ${type}
+LOCATION: ${location || 'Not specified'}
+EXPERIENCE LEVEL: ${experience || 'Not specified'}
+BUDGET / RATE: ${budget || 'Not specified'}
+KEY SKILLS: ${skills || 'Not specified'}
+
+JOB DESCRIPTION:
+${description}
+
+SUBMITTED BY:
+Name: ${contactName}
+Email: ${contactEmail}
+Phone: ${contactPhone || 'Not provided'}`;
+
+  // Keep a local record of submitted job requirements
+  try {
+    const jobs = JSON.parse(localStorage.getItem('postedJobs') || '[]');
+    jobs.push({ company, title, type, location, experience, budget, skills, description, contactName, contactEmail, contactPhone, date: new Date().toISOString() });
+    localStorage.setItem('postedJobs', JSON.stringify(jobs));
+  } catch (e) { /* ignore storage errors */ }
+
+  const mailtoLink = `mailto:${RECRUITER_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.location.href = mailtoLink;
+
+  jobMsgEl.innerHTML = `✅ Opening your email app to send this requirement to ${RECRUITER_EMAIL}. If nothing opens, copy the details and email me directly.`;
+});
+
+const chatDiv = document.getElementById('chatMessages');
+const chatInput = document.getElementById('chatInput');
+const sendChatBtn = document.getElementById('sendChat');
+
+function addMsg(sender, text) {
+  const d = document.createElement('div');
+  d.style.marginBottom = '4px';
+  d.innerHTML = `<strong style="color:var(--text-primary);">${sender}:</strong> <span style="color:var(--text-secondary);">${text}</span>`;
+  chatDiv.appendChild(d);
+  chatDiv.scrollTop = chatDiv.scrollHeight;
+}
+
+function botReply(msg) {
+  let reply = '';
+  const m = msg.toLowerCase();
+  if (m.includes('mcp')) reply = 'We have MCP Architect roles at Walmart & JPMorgan. I specialize in Model Context Protocol hiring.';
+  else if (m.includes('agentic')) reply = 'Agentic AI roles are hot right now! I\'ve placed 15+ Agentic AI Engineers in the last 6 months.';
+  else if (m.includes('genai') || m.includes('generative')) reply = 'GenAI is my specialty! I source LLM Engineers, AI Product Managers, and GenAI Specialists.';
+  else if (m.includes('cloud')) reply = 'Cloud hiring is strong - AWS, Azure, GCP. I\'ve closed 40+ cloud roles in 2025.';
+  else reply = 'I specialize in MCP, GenAI, Cloud leadership, and AI recruiting. Ask me anything about tech hiring!';
+  addMsg('🤖 AI Assistant', reply);
+}
+
+function handleChat() {
+  const t = chatInput.value.trim();
+  if (!t) return;
+  addMsg('You', t);
+  chatInput.value = '';
+  botReply(t);
+}
+sendChatBtn.addEventListener('click', handleChat);
+chatInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleChat(); });
+
+// ========================================================================
+// 10. BLOG
+// ========================================================================
+const defaultBlogs = [
+  { id: 1, title: "How to Source MCP Architects with GPT-4o", content: "Full guide: Using Boolean + GPT-4o prompts to discover MCP (Model Context Protocol) engineers. I generated a search string combining 'LangChain', 'vector databases', and 'agentic workflows'. Result: 47 qualified candidates from GitHub + LinkedIn in under 2 hours. This technique reduced our sourcing time by 70%.", tags: ["#AISourcing", "#MCP"], date: "2025-03-15" },
+  { id: 2, title: "GitHub GraphQL: Find GenAI Engineers", content: "Real case study: I queried GitHub's GraphQL API for contributors to 'LangChain' and 'AutoGPT' repositories. Filtered by location and commit activity. Discovered 12 senior LLM engineers who were not actively job searching. 4 were hired within 3 weeks. Pro tip: Use 'created:>2024-01-01' to find active contributors.", tags: ["#OpenSource", "#GenAI"], date: "2025-03-20" },
+  { id: 3, title: "AI-Powered Candidate Engagement Templates", content: "Template example: 'Hi {name}, I saw your work on {project}. We're building an Agentic AI team at {company}. Would you be open to a 15-min chat about {role}?' This personalized approach achieved 68% response rate vs 22% industry average. I've automated this using GPT workflows.", tags: ["#CandidateEngagement", "#GPT"], date: "2025-04-01" }
+];
+
+function loadBlogs() {
+  const stored = localStorage.getItem('talentverseBlogs');
+  if (stored) return JSON.parse(stored);
+  localStorage.setItem('talentverseBlogs', JSON.stringify(defaultBlogs));
+  return [...defaultBlogs];
+}
+
+function saveBlogs(blogs) {
+  localStorage.setItem('talentverseBlogs', JSON.stringify(blogs));
+}
+
+function openBlogModal(blog) {
+  document.getElementById('modalTitle').textContent = blog.title;
+  document.getElementById('modalDate').innerHTML = `<i class="ti ti-calendar"></i> ${blog.date} • 5 min read`;
+  document.getElementById('modalBody').innerHTML = `<p>${blog.content.replace(/\n/g, '<br>')}</p>`;
+  document.getElementById('modalTags').innerHTML = blog.tags.map(t => `<span class="blog-tag">${t}</span>`).join('');
+  document.getElementById('blogModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function renderBlogs() {
+  const blogs = loadBlogs();
+  const container = document.getElementById('blogContainer');
+  if (!container) return;
+  container.innerHTML = '';
+  blogs.forEach(blog => {
+    const card = document.createElement('div');
+    card.className = 'blog-card reveal-hidden';
+    card.innerHTML = `
+      <i class="ti ti-article" style="font-size:1.3rem; color:var(--primary);"></i>
+      <h3 style="color:var(--text-primary); font-size:0.85rem; margin-top:0.2rem;">${blog.title.substring(0, 50)}${blog.title.length>50?'...':''}</h3>
+      <p style="color:var(--text-secondary); font-size:0.7rem;">${blog.content.substring(0, 80)}...</p>
+      <div style="font-size:0.55rem; margin-top:5px; color:var(--text-muted);">📅 ${blog.date}</div>
+      ${isAdmin ? `<div style="margin-top:6px;"><button onclick="editBlog(${blog.id})" class="btn-secondary" style="padding:0.15rem 0.5rem; font-size:0.55rem;">Edit</button> <button onclick="deleteBlog(${blog.id})" class="btn-primary" style="padding:0.15rem 0.5rem; font-size:0.55rem;">Delete</button></div>` : ''}
+    `;
+    card.addEventListener('click', (e) => {
+      if (!e.target.closest('button')) openBlogModal(blog);
+    });
+    container.appendChild(card);
+    observer.observe(card);
+  });
+}
+
+window.editBlog = (id) => {
+  const newTitle = prompt('Edit title');
+  if (newTitle) {
+    let blogs = loadBlogs();
+    let blog = blogs.find(b => b.id === id);
+    if (blog) blog.title = newTitle;
+    saveBlogs(blogs);
+    renderBlogs();
+  }
+};
+window.deleteBlog = (id) => {
+  if (confirm('Delete permanently?')) {
+    let blogs = loadBlogs().filter(b => b.id !== id);
+    saveBlogs(blogs);
+    renderBlogs();
+  }
+};
+
+document.getElementById('closeModalBtn').onclick = () => {
+  document.getElementById('blogModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+};
+window.onclick = (e) => {
+  const modal = document.getElementById('blogModal');
+  if (e.target === modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  }
+};
+renderBlogs();
+
+// ========================================================================
+// 11. RESUME DOWNLOAD - DOCX ONLY
+// ========================================================================
+function downloadResumeDOCX() {
+  const resumeText = `Suraj Singh
+
+Engineering Hiring Leader | MCP, Agentic AI & GenAI Recruiter | AI-Driven Talent Acquisition
+
+Indore, Madhya Pradesh, India | Email: suraj.singh@bayonesolutions.com | LinkedIn: linkedin.com/in/surajsingh-ai
+
+PROFESSIONAL SUMMARY
+
+Engineering Hiring Leader with 7+ years of experience in global technical recruitment, specializing in AI, Generative AI, MCP, Agentic AI, AI/ML, Cloud, Data Engineering, Product, and Enterprise Technology hiring across North America, APAC, and LATAM. Partnered with enterprise and FAANG-adjacent organizations including Sephora, Walmart, JPMorgan Chase, HPE, Albertsons, Meta, Equinix, Samsung, Airbnb, Sony, and GoPro to build high-performing engineering and product teams.
+
+Strong expertise in AI-driven recruiting, technical sourcing, stakeholder partnership, talent intelligence, candidate engagement, and hiring strategy. Hands-on experience using ChatGPT, Claude, prompt engineering, and custom GPT workflows to improve recruiting efficiency.
+
+AI & EMERGING TECHNOLOGY EXPERTISE
+
+- MCP (Model Context Protocol) & Agentic AI Talent Hiring
+- Generative AI (GenAI), LLM Engineering & AI Product Hiring
+- AI Engineers, AI Architects, Data Engineers & AI/ML Specialists
+- Prompt Engineering & AI-powered recruitment workflows
+- ChatGPT, Claude, Gemini, Custom GPT workflows
+- RAG, LLM, AI Platform and Enterprise AI ecosystem hiring
+
+CORE COMPETENCIES
+
+- Full Life Cycle Recruiting (Contract, C2H, FTE)
+- Engineering, Product, Data, Cloud & AI Hiring
+- Hiring Manager & Client Relationship Management
+- Strategic Sourcing & Market Mapping
+- LinkedIn Recruiter, Dice, GitHub, Stack Overflow
+- ATS/VMS: JobDiva, Ceipal, Workday, Fieldglass
+- Interview Management, Offer Negotiation & Delivery Leadership
+
+PROFESSIONAL EXPERIENCE
+
+BayOne Solutions | Lead Talent Partner (AI & Engineering Hiring) | June 2022 - Present
+
+- Lead end-to-end recruitment for AI, GenAI, MCP, Agentic AI, Data, Cloud, Backend, Frontend, Full Stack, DevOps, and Enterprise Architecture roles.
+- Partner with Engineering Managers, Product Leaders, Architects, and business stakeholders to scale technology organizations.
+- Specialized hiring for MCP Architects, Agentic AI Engineers, AI Product Managers, GenAI Specialists, Lead Data Engineers, and AI-focused Data Architects.
+- Leverage AI-driven recruiting strategies using Claude, ChatGPT, prompt engineering, and custom GPT workflows.
+- Support enterprise clients including Sephora, Walmart, JPMorgan Chase, HPE, Albertsons, Woven, Shipt, McGrath RentCorp, and Hims & Hers Health.
+
+AMISEQ | Senior Technical Recruiter | July 2021 - June 2022
+
+- Managed complete recruitment lifecycle including sourcing, screening, interview coordination, offer management, and onboarding.
+- Supported major client engagements including Walmart, Meta, and Equinix.
+- Built pipelines across Backend, Frontend, Full Stack, Cloud, DevOps, Data Engineering, Infrastructure, and Product roles.
+
+Global Information Technology | Talent Acquisition Lead | August 2020 - July 2021
+
+- Led recruitment strategy for Analytics, Cloud, Data Platforms, and emerging technology roles.
+- Managed recruiting teams and improved sourcing efficiency through market intelligence and process optimization.
+
+Vertisystem | Senior IT Recruiter | 2018 - 2019
+
+- Managed full-cycle IT recruitment across software development lifecycle and infrastructure domains.
+- Handled sourcing, candidate engagement, negotiations, and client delivery.
+
+RECOGNITION & AWARDS
+
+- The Growth Accelerator Award --- Quarter 1 2026
+- The Money Magnet Award --- Quarter 1 2026
+- The Growth Accelerator Award --- February 2026
+- The Sourcing Sentinel Award --- August 2025
+- The Money Magnet Award --- September 2025
+- Growth Accelerator Award --- September 2025
+
+CERTIFICATIONS
+
+- AI-Driven Recruiting - LinkedIn Recruiter Power User Assessment (Issued July 2025)
+- Employer Branding Certification - hirist
+- MERN Stack & Advanced JavaScript Certifications
+
+TECHNICAL BACKGROUND
+
+MERN Stack Development: MongoDB, Express.js, React.js, Node.js, JavaScript, HTML, CSS, GitHub
+
+EDUCATION
+
+Bachelor of Engineering (B.E.) - Information Technology
+Rustamji Institute of Technology`;
+
+  const blob = new Blob([resumeText], { type: 'application/msword;charset=utf-8' });
+  saveAs(blob, 'Suraj_Singh_Detailed_AI_Resume_With_Awards.docx');
+}
+
+// ========================================================================
+// 12. SMOOTH SCROLL
+// ========================================================================
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth' });
+      if (navLinksMobile.classList.contains('open')) {
+        navLinksMobile.classList.remove('open');
+      }
+    }
+  });
+});
+</script>
+</body>
+</html>
